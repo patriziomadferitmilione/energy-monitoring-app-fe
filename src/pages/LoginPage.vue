@@ -1,20 +1,24 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-card class="q-pa-md shadow-2" style="width: 300px">
-      <q-card-section>
-        <div class="text-h6">Login</div>
-      </q-card-section>
+  <q-layout view="lHh lpR fFf">
+    <q-page-container>
+      <q-page class="flex flex-center">
+        <q-card class="q-pa-md shadow-2" style="width: 300px">
+          <q-card-section>
+            <div class="text-h6">Login</div>
+          </q-card-section>
 
-      <q-card-section>
-        <q-input v-model="email" label="Email" type="email" />
-        <q-input v-model="password" label="Password" type="password" class="q-mt-md" />
-      </q-card-section>
+          <q-card-section>
+            <q-input v-model="email" label="Email" type="email" />
+            <q-input v-model="password" label="Password" type="password" class="q-mt-md" />
+          </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn label="Login" color="primary" @click="login" />
-      </q-card-actions>
-    </q-card>
-  </q-page>
+          <q-card-actions align="right">
+            <q-btn label="Login" color="primary" @click="login" />
+          </q-card-actions>
+        </q-card>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
