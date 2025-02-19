@@ -1,5 +1,6 @@
 import { route } from 'quasar/wrappers'
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from 'stores/authStore' // Import the store
 import routes from './routes'
 
 export default route(function () {
@@ -10,9 +11,9 @@ export default route(function () {
 
   // Navigation Guard: Protect Auth Routes
   Router.beforeEach((to, from, next) => {
-    const isAuthenticated = localStorage.getItem('authenticated') === 'true'
+    const authStore = useAuthStore()
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       next('/login')
     } else {
       next()

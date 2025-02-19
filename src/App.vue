@@ -1,30 +1,30 @@
 <template>
-  <router-view v-if="isAuthenticated" />
-  <LoginPage v-else @login-success="handleLogin" />
+  <router-view v-if="authStore.isAuthenticated" />
+  <LoginPage v-else />
 </template>
 
 <script>
+import { useAuthStore } from 'stores/authStore'
+import { useBillStore } from 'stores/billStore'
 import LoginPage from 'pages/LoginPage.vue'
 
 export default {
   components: { LoginPage },
+
   data() {
     return {
-      isAuthenticated: false,
+      authStore: useAuthStore(),
+      billStore: useBillStore(),
     }
   },
-  methods: {
-    handleLogin() {
-      this.isAuthenticated = true
-      localStorage.setItem('authenticated', 'true') // Save login state
-      this.$router.push('/') // Redirect to main layout
-    },
-    checkAuth() {
-      this.isAuthenticated = localStorage.getItem('authenticated') === 'true'
-    },
-  },
-  created() {
-    this.checkAuth()
+
+  async created() {
+    this.authStore.checkAuth()
+
+    if (this.isAuthenticated) {
+      console.log('[App.vue] User authenticated, fetching bills...')
+      await this.billStore.fetchBills()
+    }
   },
 }
 </script>

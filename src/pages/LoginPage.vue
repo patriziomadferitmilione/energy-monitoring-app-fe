@@ -7,14 +7,23 @@
             <div class="text-h6">Login</div>
           </q-card-section>
 
-          <q-card-section>
-            <q-input v-model="email" label="Email" type="email" />
-            <q-input v-model="password" label="Password" type="password" class="q-mt-md" />
-          </q-card-section>
+          <!-- Form to avoid DOM warning -->
+          <q-form @submit.prevent="login">
+            <q-card-section>
+              <q-input v-model="email" label="Email" type="email" autocomplete="email" />
+              <q-input
+                v-model="password"
+                label="Password"
+                type="password"
+                class="q-mt-md"
+                autocomplete="current-password"
+              />
+            </q-card-section>
 
-          <q-card-actions align="right">
-            <q-btn label="Login" color="primary" @click="login" />
-          </q-card-actions>
+            <q-card-actions align="right">
+              <q-btn type="submit" label="Login" color="primary" />
+            </q-card-actions>
+          </q-form>
         </q-card>
       </q-page>
     </q-page-container>
@@ -22,9 +31,13 @@
 </template>
 
 <script>
+import { useAuthStore } from 'stores/authStore'
+import axios from 'axios'
+
 export default {
   data() {
     return {
+      authStore: useAuthStore(),
       email: '',
       password: '',
     }
@@ -32,21 +45,21 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.email, password: this.password }),
+        const response = await axios.post('http://localhost:5000/api/auth/login', {
+          email: this.email,
+          password: this.password,
         })
 
-        const data = await response.json()
-        if (response.ok) {
-          localStorage.setItem('token', data.token)
-          this.$emit('login-success') // Notify App.vue to switch to MainLayout
+        if (response.status === 200) {
+          this.authStore.login(response.data.token)
+          this.$router.push('/')
         } else {
-          alert(data.message || 'Login failed')
+          console.warn('[LoginPage] Login failed:', response.data.message)
+          alert(response.data.message || 'Login failed')
         }
       } catch (error) {
-        console.log('Login error', error)
+        console.error('[LoginPage] Login error:', error)
+        alert('Invalid credentials or server error.')
       }
     },
   },

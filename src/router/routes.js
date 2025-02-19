@@ -7,7 +7,7 @@ const routes = [
       { path: 'bills', component: () => import('pages/BillsPage.vue') },
       { path: 'contracts', component: () => import('pages/ContractsPage.vue') },
     ],
-    meta: { requiresAuth: true }, // Protect these routes
+    meta: { requiresAuth: true },
   },
   {
     path: '/login',
