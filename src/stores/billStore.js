@@ -3,6 +3,7 @@ import axios from 'axios'
 
 export const useBillStore = defineStore('billStore', {
   state: () => ({
+    baseUrl: '95.217.214.37:5000',
     bills: [],
     contracts: [],
     loading: false,
@@ -53,7 +54,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/bills', {
+        const response = await axios.get(`http://${this.baseUrl}/api/bills`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.bills = response.data
@@ -67,7 +68,7 @@ export const useBillStore = defineStore('billStore', {
     async addBill() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.post('http://localhost:5000/api/bills', this.newBill, {
+        const response = await axios.post(`http://${this.baseUrl}/api/bills`, this.newBill, {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         })
 
@@ -114,7 +115,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/contracts', {
+        const response = await axios.get(`http://${this.baseUrl}/api/contracts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.contracts = response.data
@@ -129,7 +130,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/bills/summary', {
+        const response = await axios.get(`http://${this.baseUrl}/api/bills/summary`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         console.log('fetch bills summary', response)
@@ -145,7 +146,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/bills/unpaid', {
+        const response = await axios.get(`http://${this.baseUrl}/api/bills/unpaid`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         console.log('unpaid', response)
@@ -161,7 +162,7 @@ export const useBillStore = defineStore('billStore', {
       try {
         const token = localStorage.getItem('token')
         await axios.put(
-          `http://localhost:5000/api/bills/${billId}`,
+          `http://${this.baseUrl}/api/bills/${billId}`,
           { status: newStatus },
           { headers: { Authorization: `Bearer ${token}` } },
         )
@@ -182,7 +183,7 @@ export const useBillStore = defineStore('billStore', {
     async fetchOverdueBills() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/bills/overdue', {
+        const response = await axios.get(`http://${this.baseUrl}/api/bills/overdue`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.overdueBills = response.data

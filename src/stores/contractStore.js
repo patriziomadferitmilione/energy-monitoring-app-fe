@@ -3,6 +3,7 @@ import axios from 'axios'
 
 export const useContractStore = defineStore('contractStore', {
   state: () => ({
+    baseUrl: '95.217.214.37:5000',
     contracts: [],
     loading: false,
     showDialog: false,
@@ -27,7 +28,7 @@ export const useContractStore = defineStore('contractStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:5000/api/contracts', {
+        const response = await axios.get(`http://${this.baseUrl}/api/contracts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.contracts = response.data
@@ -41,12 +42,16 @@ export const useContractStore = defineStore('contractStore', {
     async addContract() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.post('http://localhost:5000/api/contracts', this.newContract, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+        const response = await axios.post(
+          `http://${this.baseUrl}/api/contracts`,
+          this.newContract,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
           },
-        })
+        )
         this.contracts.push(response.data) // Add new contract to the list
         this.closeDialog()
         this.resetNewContract()

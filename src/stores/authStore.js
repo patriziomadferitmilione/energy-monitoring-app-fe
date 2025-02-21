@@ -3,6 +3,7 @@ import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
+    baseUrl: '95.217.214.37:5000',
     isAuthenticated: !!localStorage.getItem('token'),
   }),
 
@@ -29,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/verify', {
+        const response = await axios.get(`http://${this.baseUrl}/api/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
