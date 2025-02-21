@@ -58,6 +58,16 @@
               </q-item-label>
               <q-item-label caption> Stato: {{ bill.status }} </q-item-label>
             </q-item-section>
+            <q-item-section side>
+              <q-select
+                v-model="bill.status"
+                :options="['paid', 'pending', 'overdue']"
+                dense
+                emit-value
+                map-options
+                @update:model-value="updateStatus(bill._id, bill.status)"
+              />
+            </q-item-section>
           </q-item>
         </q-list>
 
@@ -79,6 +89,16 @@
                 Periodo: {{ bill.billing_period_start }} - {{ bill.billing_period_end }}
               </q-item-label>
               <q-item-label caption> Stato: {{ bill.status }} </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-select
+                v-model="bill.status"
+                :options="['paid', 'pending', 'overdue']"
+                dense
+                emit-value
+                map-options
+                @update:model-value="updateStatus(bill._id, bill.status)"
+              />
             </q-item-section>
           </q-item>
         </q-list>
@@ -289,6 +309,9 @@ export default {
     },
     saveBill() {
       this.billStore.addBill()
+    },
+    async updateStatus(billId, newStatus) {
+      await this.billStore.updateBillStatus(billId, newStatus)
     },
   },
   created() {

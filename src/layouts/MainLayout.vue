@@ -12,6 +12,9 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list class="full-height flex column">
         <!-- Tariff Card -->
+        <q-item class="text-center">
+          <q-item-section>Orario corrente</q-item-section>
+        </q-item>
         <q-item>
           <q-card class="q-pa-none full-width min-h-12" :class="tariffClass">
             <q-card-section class="text-center q-pa-none">
@@ -110,7 +113,7 @@ export default {
         // Monday - Friday
         if (hour >= 8 && hour < 19) {
           tariff = 'F1'
-          description = 'Peak hours'
+          description = 'Fascia oraria più cara'
         } else if ((hour >= 7 && hour < 8) || (hour >= 19 && hour < 23)) {
           tariff = 'F2'
           description = 'Fascia oraria intermedia'

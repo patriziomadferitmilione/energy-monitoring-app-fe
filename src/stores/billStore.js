@@ -32,6 +32,7 @@ export const useBillStore = defineStore('billStore', {
         total_value: null,
       },
     },
+    unpaidBills: [],
   }),
 
   getters: {
@@ -121,6 +122,72 @@ export const useBillStore = defineStore('billStore', {
         console.error('Error fetching contracts:', error)
       } finally {
         this.loading = false
+      }
+    },
+
+    async fetchBillSummary() {
+      this.loading = true
+      try {
+        const token = localStorage.getItem('token')
+        const response = await axios.get('http://localhost:5000/api/bills/summary', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        console.log('fetch bills summary', response)
+        this.billSummary = response.data
+      } catch (error) {
+        console.error('Error fetching bill summary:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchUnpaidBills() {
+      this.loading = true
+      try {
+        const token = localStorage.getItem('token')
+        const response = await axios.get('http://localhost:5000/api/bills/unpaid', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        console.log('unpaid', response)
+        this.unpaidBills = response.data
+      } catch (error) {
+        console.error('Error fetching unpaid bills:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateBillStatus(billId, newStatus) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.put(
+          `http://localhost:5000/api/bills/${billId}`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+
+        // Update the bill status locally
+        const billIndex = this.bills.findIndex((bill) => bill._id === billId)
+        if (billIndex !== -1) {
+          this.bills[billIndex].status = newStatus
+        }
+
+        // Refresh unpaid bills
+        await this.fetchUnpaidBills()
+      } catch (error) {
+        console.error('Error updating bill status:', error)
+      }
+    },
+
+    async fetchOverdueBills() {
+      try {
+        const token = localStorage.getItem('token')
+        const response = await axios.get('http://localhost:5000/api/bills/overdue', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        this.overdueBills = response.data
+      } catch (error) {
+        console.error('Error fetching overdue bills:', error)
       }
     },
   },
