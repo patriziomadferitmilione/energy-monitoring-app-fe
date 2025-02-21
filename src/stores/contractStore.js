@@ -28,7 +28,7 @@ export const useContractStore = defineStore('contractStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`http://${this.baseUrl}/api/contracts`, {
+        const response = await axios.get(`https://${this.baseUrl}/api/contracts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.contracts = response.data
@@ -43,7 +43,7 @@ export const useContractStore = defineStore('contractStore', {
       try {
         const token = localStorage.getItem('token')
         const response = await axios.post(
-          `http://${this.baseUrl}/api/contracts`,
+          `https://${this.baseUrl}/api/contracts`,
           this.newContract,
           {
             headers: {

@@ -5,7 +5,7 @@ import routes from './routes'
 
 export default route(function () {
   const Router = createRouter({
-    history: createWebHashHistory('/energy-monitoring-app-fe/'),
+    history: createWebHashHistory('/'),
     routes,
   })
 

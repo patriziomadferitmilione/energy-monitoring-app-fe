@@ -58,7 +58,7 @@ export default defineConfig((/* ctx */) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: '/energy-monitoring-app-fe/',
+      publicPath: '/',
       // analyze: true,
       // env: {},
       // rawDefine: {}

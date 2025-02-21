@@ -30,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const response = await axios.get(`http://${this.baseUrl}/api/auth/verify`, {
+        const response = await axios.get(`https://${this.baseUrl}/api/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 

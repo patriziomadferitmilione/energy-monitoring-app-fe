@@ -45,7 +45,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post(`http://${this.authStore.baseUrl}/api/auth/login`, {
+        const response = await axios.post(`https://${this.authStore.baseUrl}/api/auth/login`, {
           email: this.email,
           password: this.password,
         })
