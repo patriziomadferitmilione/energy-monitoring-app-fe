@@ -3,8 +3,8 @@ import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    baseUrl: 'http://localhost:5000',
-    // baseUrl: 'https://backend.bollettify.com',
+    // baseUrl: 'http://localhost:5000',
+    baseUrl: 'https://backend.bollettify.com',
     isAuthenticated: !!localStorage.getItem('token'),
     loggedUser: JSON.parse(localStorage.getItem('loggedUser')) || null,
   }),
