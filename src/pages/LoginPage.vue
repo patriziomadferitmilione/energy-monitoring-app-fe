@@ -32,7 +32,6 @@
 
 <script>
 import { useAuthStore } from 'stores/authStore'
-import axios from 'axios'
 
 export default {
   data() {
@@ -45,21 +44,11 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post(`${this.authStore.baseUrl}/api/auth/login`, {
-          email: this.email,
-          password: this.password,
-        })
-
-        if (response.status === 200) {
-          this.authStore.login(response.data.token)
-          this.$router.push('/')
-        } else {
-          console.warn('[LoginPage] Login failed:', response.data.message)
-          alert(response.data.message || 'Login failed')
-        }
+        await this.authStore.login({ email: this.email, password: this.password })
+        this.$router.push('/')
       } catch (error) {
         console.error('[LoginPage] Login error:', error)
-        alert('Invalid credentials or server error.')
+        alert(error.response?.data?.message || 'Invalid credentials or server error.')
       }
     },
   },

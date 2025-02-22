@@ -3,8 +3,8 @@ import axios from 'axios'
 
 export const useContractStore = defineStore('contractStore', {
   state: () => ({
-    // baseUrl: 'http://localhost:5000',
-    baseUrl: 'https://backend.bollettify.com',
+    baseUrl: 'http://localhost:5000',
+    // baseUrl: 'https://backend.bollettify.com',
     contracts: [],
     loading: false,
     showDialog: false,

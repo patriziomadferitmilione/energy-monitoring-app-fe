@@ -4,7 +4,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleDrawer" />
-        <q-toolbar-title>Controllo Energia</q-toolbar-title>
+        <q-toolbar-title>Bollettify</q-toolbar-title>
       </q-toolbar>
     </q-header>
 

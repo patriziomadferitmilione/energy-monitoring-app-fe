@@ -3,13 +3,17 @@ import axios from 'axios'
 
 export const useBillStore = defineStore('billStore', {
   state: () => ({
-    // baseUrl: 'http://localhost:5000',
-    baseUrl: 'https://backend.bollettify.com',
+    baseUrl: 'http://localhost:5000',
+    // baseUrl: 'https://backend.bollettify.com',
     bills: [],
     contracts: [],
     loading: false,
     showDialog: false,
+    pdfFile: null,
     newBill: {
+      user_id: null,
+      contract_id: null,
+      customerCode: '',
       bill_type: '',
       provider: '',
       bill_number: '',
@@ -25,16 +29,33 @@ export const useBillStore = defineStore('billStore', {
         energy: null,
         transport: null,
         system_duties: null,
-        other_duties: null,
         taxes: null,
         vat: null,
       },
       consumption: {
         unit: '',
         total_value: null,
+        f1_unit_price: null,
+        f1_quantity: null,
+        f1_value: null,
+        f2_unit_price: null,
+        f2_quantity: null,
+        f2_value: null,
+        f3_unit_price: null,
+        f3_quantity: null,
+        f3_value: null,
+      },
+      user: {
+        name: '',
+        address: {
+          street: '',
+          civic_number: '',
+          cap: '',
+          city: '',
+          province: '',
+        },
       },
     },
-    unpaidBills: [],
   }),
 
   getters: {
@@ -190,6 +211,138 @@ export const useBillStore = defineStore('billStore', {
         this.overdueBills = response.data
       } catch (error) {
         console.error('Error fetching overdue bills:', error)
+      }
+    },
+
+    async uploadPDF() {
+      if (!this.pdfFile) {
+        console.warn('🚨 No file selected for upload')
+        return
+      }
+
+      let formData = new FormData()
+      formData.append('pdfFile', this.pdfFile)
+
+      const token = localStorage.getItem('token')
+      const loggedUser = JSON.parse(localStorage.getItem('loggedUser')) // Get user data
+
+      if (!loggedUser) {
+        console.error('🚨 No logged-in user found.')
+        return
+      }
+
+      console.log(
+        '📤 Uploading PDF file:',
+        this.pdfFile,
+        'for user:',
+        loggedUser.firstName,
+        loggedUser.lastName,
+      )
+
+      try {
+        let response = await axios.post(`${this.baseUrl}/api/bills/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+          params: { userName: `${loggedUser.firstName}_${loggedUser.lastName}` },
+        })
+
+        console.log('✅ Server Response:', response.data)
+
+        if (response.data.structuredData) {
+          this.populateBillForm(response.data.structuredData)
+          this.openDialog()
+        }
+      } catch (error) {
+        console.error('🚨 Upload Error:', error)
+        if (error.response) {
+          console.error('🔍 Error Details:', error.response.data)
+        }
+      }
+    },
+
+    populateBillForm(data) {
+      const formatDateForInput = (dateStr) => {
+        if (!dateStr) return ''
+
+        // Handle "05 Marzo 2025" format
+        const monthNames = {
+          Gennaio: '01',
+          Febbraio: '02',
+          Marzo: '03',
+          Aprile: '04',
+          Maggio: '05',
+          Giugno: '06',
+          Luglio: '07',
+          Agosto: '08',
+          Settembre: '09',
+          Ottobre: '10',
+          Novembre: '11',
+          Dicembre: '12',
+        }
+
+        let dateParts = dateStr.split(' ')
+        if (dateParts.length === 3) {
+          let [day, month, year] = dateParts
+          month = monthNames[month] || '01' // Convert Italian month name to number
+          return `${year}-${month}-${day.padStart(2, '0')}`
+        }
+
+        // Handle "DD/MM/YYYY" format
+        if (dateStr.includes('/')) {
+          let [day, month, year] = dateStr.split('/')
+          return `${year}-${month}-${day}`
+        }
+
+        return ''
+      }
+
+      this.newBill = {
+        user_id: data.user_id || null,
+        contract_id: data.contract_id || null,
+        customerCode: data.customerCode || '',
+        bill_type: data.bill_type || '',
+        provider: data.provider || '',
+        bill_number: data.bill_number || '',
+        billing_period_start: formatDateForInput(data.billing_period_start),
+        billing_period_end: formatDateForInput(data.billing_period_end),
+        due_date: formatDateForInput(data.due_date),
+        issue_date: formatDateForInput(data.issue_date),
+        meter_number: data.meter_number || '',
+        currency: data.currency || '€',
+        status: data.status || 'pending',
+        expenses: {
+          total_amount: data.expenses.total_amount || null,
+          energy: data.expenses.energy || null,
+          transport: data.expenses.transport || null,
+          system_duties: data.expenses.system_duties || null,
+          taxes: data.expenses.taxes || null,
+          vat: data.expenses.vat || null,
+        },
+        consumption: {
+          unit: data.consumption.unit || '',
+          total_value: data.consumption.total_value || null,
+          f1_unit_price: data.consumption.f1_unit_price || null,
+          f1_quantity: data.consumption.f1_quantity || null,
+          f1_value: data.consumption.f1_value || null,
+          f2_unit_price: data.consumption.f2_unit_price || null,
+          f2_quantity: data.consumption.f2_quantity || null,
+          f2_value: data.consumption.f2_value || null,
+          f3_unit_price: data.consumption.f3_unit_price || null,
+          f3_quantity: data.consumption.f3_quantity || null,
+          f3_value: data.consumption.f3_value || null,
+        },
+        user: {
+          name: data.user.name || '',
+          // address: {
+          //   street: data.user.address.street || '',
+          //   civic_number: data.user.address.civic_number || '',
+          //   cap: data.user.address.cap || '',
+          //   city: data.user.address.city || '',
+          //   province: data.user.address.province || '',
+          // },
+        },
       }
     },
   },

@@ -2,7 +2,7 @@
   "name": "energy-monitoring-app-fe",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Energy Monitoring App",
+  "productName": "Bollettify",
   "author": "Patrizio Milione <patriziomilione@gmail.com>",
   "type": "module",
   "private": true,
