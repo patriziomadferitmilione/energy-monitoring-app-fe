@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { Notify } from 'quasar'
 import { globalBaseUrl } from 'src/boot/global'
 
 export const useAuthStore = defineStore('auth', {
@@ -13,15 +14,27 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axios.post(`${globalBaseUrl}/api/auth/login`, credentials)
         const user = response.data
-        // console.log('login res', response)
+
         localStorage.setItem('token', user.token)
         localStorage.setItem('loggedUser', JSON.stringify(user))
         localStorage.setItem('authenticated', 'true')
 
         this.isAuthenticated = true
         this.loggedUser = user
+
+        Notify.create({
+          message: 'Login eseguito correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
       } catch (error) {
         console.error('[authStore] Login failed:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nel login',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
         throw error
       }
     },
@@ -32,6 +45,12 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('loggedUser')
       this.isAuthenticated = false
       this.loggedUser = null
+
+      Notify.create({
+        message: 'Logout eseguito correttamente',
+        color: 'positive',
+        position: 'bottom',
+      })
     },
 
     async checkAuth() {
@@ -56,6 +75,12 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.error('[authStore] Auth check failed:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Autenticazione non valida',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
         this.logout()
       }
     },

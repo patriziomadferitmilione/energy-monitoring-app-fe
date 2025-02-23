@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { Notify } from 'quasar'
 import { globalBaseUrl } from 'src/boot/global'
 
 export const useBillStore = defineStore('billStore', {
@@ -20,7 +21,6 @@ export const useBillStore = defineStore('billStore', {
       due_date: '',
       issue_date: '',
       meter_number: '',
-      // currency: '€',
       status: 'pending',
       expenses: {
         total_amount: null,
@@ -80,6 +80,12 @@ export const useBillStore = defineStore('billStore', {
         this.bills = response.data
       } catch (error) {
         console.error('Error fetching bills:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nel recupero bollette',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       } finally {
         this.loading = false
       }
@@ -95,11 +101,23 @@ export const useBillStore = defineStore('billStore', {
         if (response.status === 201) {
           this.bills.push(response.data)
           this.resetForm()
+
+          Notify.create({
+            message: 'Bolletta aggiunta correttamente',
+            color: 'positive',
+            position: 'bottom',
+          })
         } else {
           console.error('Failed to add bill')
         }
       } catch (error) {
         console.error('Error saving bill:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nella creazione della bolletta',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       }
     },
 
@@ -113,14 +131,12 @@ export const useBillStore = defineStore('billStore', {
         due_date: '',
         issue_date: '',
         meter_number: '',
-        currency: '€',
         status: 'pending',
         expenses: {
           total_amount: null,
           energy: null,
           transport: null,
           system_duties: null,
-          other_duties: null,
           taxes: null,
           vat: null,
         },
@@ -131,32 +147,21 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
-    async fetchContracts() {
-      this.loading = true
-      try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`${globalBaseUrl}/api/contracts`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        this.contracts = response.data
-      } catch (error) {
-        console.error('Error fetching contracts:', error)
-      } finally {
-        this.loading = false
-      }
-    },
-
     async fetchBillSummary() {
       this.loading = true
       try {
-        const token = localStorage.getItem('token')
         const response = await axios.get(`${globalBaseUrl}/api/bills/summary`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-        // console.log('fetch bills summary', response)
         this.billSummary = response.data
       } catch (error) {
         console.error('Error fetching bill summary:', error)
+        Notify.create({
+          message: error.message || 'Errore nel recupero del riepilogo bollette',
+          color: 'negative',
+          icon: 'error',
+          position: 'top-right',
+        })
       } finally {
         this.loading = false
       }
@@ -165,14 +170,38 @@ export const useBillStore = defineStore('billStore', {
     async fetchUnpaidBills() {
       this.loading = true
       try {
-        const token = localStorage.getItem('token')
         const response = await axios.get(`${globalBaseUrl}/api/bills/unpaid`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-        // console.log('unpaid', response)
         this.unpaidBills = response.data
       } catch (error) {
         console.error('Error fetching unpaid bills:', error)
+        Notify.create({
+          message: error.message || 'Errore nel recupero delle bollette non pagate',
+          color: 'negative',
+          icon: 'error',
+          position: 'top-right',
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchOverdueBills() {
+      this.loading = true
+      try {
+        const response = await axios.get(`${globalBaseUrl}/api/bills/overdue`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+        this.overdueBills = response.data
+      } catch (error) {
+        console.error('Error fetching overdue bills:', error)
+        Notify.create({
+          message: error.message || 'Errore nel recupero delle bollette scadute',
+          color: 'negative',
+          icon: 'error',
+          position: 'top-right',
+        })
       } finally {
         this.loading = false
       }
@@ -187,34 +216,37 @@ export const useBillStore = defineStore('billStore', {
           { headers: { Authorization: `Bearer ${token}` } },
         )
 
-        // Update the bill status locally
         const billIndex = this.bills.findIndex((bill) => bill._id === billId)
         if (billIndex !== -1) {
           this.bills[billIndex].status = newStatus
         }
 
-        // Refresh unpaid bills
-        await this.fetchUnpaidBills()
+        Notify.create({
+          message: 'Stato bolletta aggiornato correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
+
+        await this.fetchBills()
       } catch (error) {
         console.error('Error updating bill status:', error)
-      }
-    },
-
-    async fetchOverdueBills() {
-      try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`${globalBaseUrl}/api/bills/overdue`, {
-          headers: { Authorization: `Bearer ${token}` },
+        Notify.create({
+          message: error.response?.data?.message || 'Errore aggiornando lo stato della bolletta',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
         })
-        this.overdueBills = response.data
-      } catch (error) {
-        console.error('Error fetching overdue bills:', error)
       }
     },
 
     async uploadPDF() {
       if (!this.pdfFile) {
-        console.warn('🚨 No file selected for upload')
+        Notify.create({
+          message: 'Nessun file selezionato per il caricamento',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
         return
       }
 
@@ -241,12 +273,21 @@ export const useBillStore = defineStore('billStore', {
         if (response.data.structuredData) {
           this.populateBillForm(response.data.structuredData)
           this.openDialog()
+
+          Notify.create({
+            message: 'Dati bolletta estratti correttamente',
+            color: 'positive',
+            position: 'bottom',
+          })
         }
       } catch (error) {
         console.error('🚨 Upload Error:', error)
-        if (error.response) {
-          console.error('🔍 Error Details:', error.response.data)
-        }
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nel caricamento del file',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       }
     },
 
@@ -272,11 +313,10 @@ export const useBillStore = defineStore('billStore', {
         let dateParts = dateStr.split(' ')
         if (dateParts.length === 3) {
           let [day, month, year] = dateParts
-          month = monthNames[month] || '01' // Convert Italian month name to number
+          month = monthNames[month] || '01'
           return `${year}-${month}-${day.padStart(2, '0')}`
         }
 
-        // Handle "DD/MM/YYYY" format
         if (dateStr.includes('/')) {
           let [day, month, year] = dateStr.split('/')
           return `${year}-${month}-${day}`
@@ -286,43 +326,13 @@ export const useBillStore = defineStore('billStore', {
       }
 
       this.newBill = {
-        user_id: data.user_id || null,
-        contract_id: data.contract_id || null,
-        customerCode: data.customerCode || '',
-        bill_type: data.bill_type || '',
-        provider: data.provider || '',
-        bill_number: data.bill_number || '',
+        ...data,
         billing_period_start: formatDateForInput(data.billing_period_start),
         billing_period_end: formatDateForInput(data.billing_period_end),
         due_date: formatDateForInput(data.due_date),
         issue_date: formatDateForInput(data.issue_date),
-        meter_number: data.meter_number || '',
         currency: data.currency || '€',
         status: data.status || 'pending',
-        expenses: {
-          total_amount: data.expenses.total_amount || null,
-          energy: data.expenses.energy || null,
-          transport: data.expenses.transport || null,
-          system_duties: data.expenses.system_duties || null,
-          taxes: data.expenses.taxes || null,
-          vat: data.expenses.vat || null,
-        },
-        consumption: {
-          unit: data.consumption.unit || '',
-          total_value: data.consumption.total_value || null,
-          f1_unit_price: data.consumption.f1_unit_price || null,
-          f1_quantity: data.consumption.f1_quantity || null,
-          f1_value: data.consumption.f1_value || null,
-          f2_unit_price: data.consumption.f2_unit_price || null,
-          f2_quantity: data.consumption.f2_quantity || null,
-          f2_value: data.consumption.f2_value || null,
-          f3_unit_price: data.consumption.f3_unit_price || null,
-          f3_quantity: data.consumption.f3_quantity || null,
-          f3_value: data.consumption.f3_value || null,
-        },
-        user: {
-          name: data.user.name || '',
-        },
       }
     },
   },

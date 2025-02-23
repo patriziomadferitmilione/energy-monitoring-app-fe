@@ -1,15 +1,15 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">Dashboard</div>
+    <div class="text-h3 text-center q-mb-md">Dashboard</div>
 
-    <!-- Bar Chart for monthly expenses -->
+    <!-- Bar Chart for Monthly Expenses -->
     <q-card class="q-pa-md q-mx-auto" style="max-width: 800px; min-height: 400px">
       <q-inner-loading :showing="initialLoading" color="primary">
         <q-spinner size="3em" />
       </q-inner-loading>
 
       <q-card-section v-if="!initialLoading" class="full-width">
-        <div class="text-subtitle1">Spese totali mensili</div>
+        <div class="text-h5 text-center">Spese totali mensili</div>
 
         <div v-if="chartData && chartData.labels.length" class="chart-container">
           <BarChart :data="chartData" :options="chartOptions" />
@@ -22,7 +22,7 @@
     <!-- Pie Chart for Gas vs Energy -->
     <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 600px; min-height: 400px">
       <q-card-section class="full-width">
-        <div class="text-subtitle1">Distribuzione Spese</div>
+        <div class="text-h5 text-center">Distribuzione Spese</div>
 
         <div v-if="pieChartData && pieChartData.labels.length" class="chart-container">
           <PieChart :data="pieChartData" :options="pieChartOptions" />
@@ -35,40 +35,41 @@
     <!-- Unpaid Bills List -->
     <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 800px">
       <q-card-section>
-        <div class="text-subtitle1">Bollette Non Pagate</div>
+        <div class="text-h4 text-center">Bollette Non Pagate</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section v-if="unpaidBills.length">
         <q-list>
-          <q-item v-for="bill in unpaidBills" :key="bill._id">
+          <q-item v-for="bill in unpaidBills" :key="bill._id" class="column q-mb-md text-center">
             <q-item-section>
-              <q-item-label class="text-bold">
+              <q-item-label class="text-h5">
                 {{ bill.provider }} - {{ bill.bill_number }}
               </q-item-label>
-              <q-item-label caption>
-                <span class="text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
+              <q-item-label class="text-h5">
+                <span class="text-h6 text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
               </q-item-label>
-              <q-item-label caption class="q-mt-xs">
-                <q-badge :color="isDueSoon(bill.due_date) ? 'red' : 'orange'" class="q-mt-xs">
+              <q-item-label caption>
+                <q-badge class="text-body1" :color="isDueSoon(bill.due_date) ? 'red' : 'orange'">
                   Scadenza: {{ formatDate(bill.due_date) }}
                 </q-badge>
               </q-item-label>
             </q-item-section>
+
+            <q-item-section class="q-mt-md">
+              <q-btn-dropdown color="primary" label="Aggiorna Stato" dense>
+                <q-list>
+                  <q-item clickable v-close-popup @click="updateStatus(bill._id, 'paid')">
+                    <q-item-section>Segna come Pagata</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="updateStatus(bill._id, 'overdue')">
+                    <q-item-section>Segna come Scaduta</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </q-item-section>
           </q-item>
-          <q-item-section side>
-            <q-btn-dropdown color="primary" label="Aggiorna Stato" flat dense>
-              <q-list>
-                <q-item clickable v-close-popup @click="updateStatus(bill._id, 'paid')">
-                  <q-item-section>Segna come Pagata</q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click="updateStatus(bill._id, 'overdue')">
-                  <q-item-section>Segna come Scaduta</q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </q-item-section>
         </q-list>
       </q-card-section>
 
@@ -80,31 +81,33 @@
     <!-- Overdue Bills Card -->
     <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 800px">
       <q-card-section>
-        <div class="text-subtitle1 text-red">🔴 Bollette Scadute</div>
+        <div class="text-h4 text-center text-negative">Bollette Scadute</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section v-if="overdueBills.length">
         <q-list>
-          <q-item v-for="bill in overdueBills" :key="bill._id">
+          <q-item v-for="bill in overdueBills" :key="bill._id" class="column q-mb-md text-center">
             <q-item-section>
-              <q-item-label class="text-bold">
+              <q-item-label class="text-bold text-h5">
                 {{ bill.provider }} - {{ bill.bill_number }}
               </q-item-label>
-              <q-item-label caption>
-                <span class="text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
+              <q-item-label class="text-h5">
+                <span class="text-h6 text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
               </q-item-label>
-              <q-item-label caption>
-                <span class="text-negative">Scaduta il:</span> {{ formatDate(bill.due_date) }}
+              <q-item-label class="text-body1">
+                <span class="text-body1 text-negative">Scaduta il:</span>
+                {{ formatDate(bill.due_date) }}
               </q-item-label>
             </q-item-section>
 
-            <q-item-section side>
+            <q-item-section class="q-mt-md">
               <q-btn
                 color="positive"
                 label="Segna come Pagata"
                 @click="updateStatus(bill._id, 'paid')"
+                class="full-width"
               />
             </q-item-section>
           </q-item>
@@ -231,7 +234,7 @@ export default {
         labels: ['Energia', 'Gas'],
         datasets: [
           {
-            backgroundColor: ['#ffcd56', '#ff6384'],
+            backgroundColor: ['#033b4f', '#b4c6cb'],
             borderColor: '#fff',
             borderWidth: 1,
             data: [],
@@ -300,12 +303,12 @@ export default {
         labels: labels.length > 0 ? labels : ['No Data'],
         datasets: [
           {
-            label: '',
+            label: 'Importo mensile',
             backgroundColor: (ctx) => {
               const canvas = ctx.chart.ctx
               const gradient = canvas.createLinearGradient(0, 0, 0, 400)
-              gradient.addColorStop(0, '#3b82f6')
-              gradient.addColorStop(1, '#1e3a8a')
+              gradient.addColorStop(0, '#033b4f')
+              gradient.addColorStop(1, '#b4c6cb')
               return gradient
             },
             borderColor: '#1e3a8a',
@@ -328,8 +331,36 @@ export default {
         labels: ['Energia', 'Gas'],
         datasets: [
           {
-            backgroundColor: ['#ffcd56', '#ff6384'],
-            borderColor: '#fff',
+            backgroundColor: (ctx) => {
+              const chart = ctx.chart
+              const { ctx: canvasCtx, chartArea } = chart
+
+              if (!chartArea) {
+                return ['#033b4f', '#b4c6cb'] // Fallback colors if the chart is not ready
+              }
+
+              // Create gradient
+              const gradientEnergy = canvasCtx.createLinearGradient(
+                0,
+                0,
+                chartArea.right,
+                chartArea.bottom,
+              )
+              gradientEnergy.addColorStop(0, '#033b4f')
+              gradientEnergy.addColorStop(1, '#05506d')
+
+              const gradientGas = canvasCtx.createLinearGradient(
+                0,
+                0,
+                chartArea.right,
+                chartArea.bottom,
+              )
+              gradientGas.addColorStop(0, '#b4c6cb')
+              gradientGas.addColorStop(1, '#d5e0e4')
+
+              return [gradientEnergy, gradientGas]
+            },
+            borderColor: '#d5e0e4',
             borderWidth: 1,
             data: [totalEnergy, totalGas],
           },
@@ -352,7 +383,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .q-card {
   display: flex;
   flex-direction: column;
@@ -365,5 +396,17 @@ export default {
   height: 300px;
   min-height: 300px;
   max-height: 400px;
+}
+
+.q-item {
+  margin: 1rem 0 1rem 0;
+  background-color: $grey;
+  border-radius: 4px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.q-list {
+  padding: 0.5rem 0 0.5rem 0;
+  background-color: transparent;
 }
 </style>

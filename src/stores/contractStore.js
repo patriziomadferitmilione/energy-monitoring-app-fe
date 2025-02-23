@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { Notify } from 'quasar'
 import { globalBaseUrl } from 'src/boot/global'
 
 export const useContractStore = defineStore('contractStore', {
@@ -23,6 +24,7 @@ export const useContractStore = defineStore('contractStore', {
       billing_frequency: '',
     },
   }),
+
   actions: {
     async fetchContracts() {
       this.loading = true
@@ -34,6 +36,12 @@ export const useContractStore = defineStore('contractStore', {
         this.contracts = response.data
       } catch (error) {
         console.error('Error fetching contracts:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nel recupero forniture',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       } finally {
         this.loading = false
       }
@@ -51,8 +59,20 @@ export const useContractStore = defineStore('contractStore', {
         this.contracts.push(response.data)
         this.closeDialog()
         this.resetNewContract()
+
+        Notify.create({
+          message: 'Fornitura aggiunta correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
       } catch (error) {
         console.error('Error adding contract:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nella creazione fornitura',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       }
     },
 

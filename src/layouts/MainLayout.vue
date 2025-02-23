@@ -143,9 +143,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .q-list {
-  background-color: #cccccc;
+  background-color: $light;
   border-radius: 0;
   color: #3a3238;
 }
