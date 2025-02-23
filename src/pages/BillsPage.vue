@@ -125,17 +125,11 @@
         </q-card-section>
 
         <q-card-section>
-          <!-- Customer Code & Contract ID (Read-only, auto-filled) -->
-          <q-input
-            v-model="billStore.newBill.customerCode"
-            label="Codice Cliente"
-            readonly
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="billStore.newBill.contract_id"
-            label="ID Contratto"
-            readonly
+          <q-select
+            v-model="billStore.newBill.contract_name"
+            label="Contratto"
+            :options="contractOptions"
+            clearable
             class="q-mb-md"
           />
 
@@ -146,7 +140,15 @@
             :options="['energy', 'gas']"
             class="q-mb-md"
           />
-          <q-input v-model="billStore.newBill.provider" label="Fornitore" class="q-mb-md" />
+
+          <q-select
+            v-model="billStore.newBill.provider"
+            label="Fornitore"
+            :options="providerOptions"
+            clearable
+            class="q-mb-md"
+          />
+
           <q-input v-model="billStore.newBill.bill_number" label="Numero Fattura" class="q-mb-md" />
           <q-input
             v-model="billStore.newBill.billing_period_start"
@@ -165,22 +167,6 @@
             label="Numero Contatore"
             class="q-mb-md"
           />
-
-          <!-- Address Fields -->
-          <!-- <div class="text-subtitle1 q-mb-sm">Indirizzo</div>
-          <q-input v-model="billStore.newBill.user.address.street" label="Via" class="q-mb-md" />
-          <q-input
-            v-model="billStore.newBill.user.address.civic_number"
-            label="Numero Civico"
-            class="q-mb-md"
-          />
-          <q-input v-model="billStore.newBill.user.address.cap" label="CAP" class="q-mb-md" />
-          <q-input v-model="billStore.newBill.user.address.city" label="Città" class="q-mb-md" />
-          <q-input
-            v-model="billStore.newBill.user.address.province"
-            label="Provincia"
-            class="q-mb-md"
-          /> -->
 
           <!-- Expenses -->
           <div class="text-subtitle1 q-mb-sm">Costi</div>
@@ -314,7 +300,7 @@
             type="date"
             class="q-mb-md"
           />
-          <q-input v-model="billStore.newBill.currency" label="Valuta" class="q-mb-md" />
+          <!-- <q-input v-model="billStore.newBill.currency" label="Valuta" class="q-mb-md" /> -->
         </q-card-section>
 
         <q-card-actions align="right">
@@ -328,6 +314,8 @@
 
 <script>
 import { useBillStore } from 'src/stores/billStore'
+import { useAdminStore } from 'src/stores/adminStore'
+import { useContractStore } from '../stores/contractStore'
 import { mapActions } from 'pinia'
 
 export default {
@@ -335,6 +323,8 @@ export default {
   data() {
     return {
       billStore: useBillStore(),
+      adminStore: useAdminStore(),
+      contractStore: useContractStore(),
 
       activeTab: 'energy',
       filters: {
@@ -373,9 +363,17 @@ export default {
       const providers = this.billStore.getBillsByType(this.activeTab).map((bill) => bill.provider)
       return [...new Set(providers)] // Remove duplicates
     },
+    providerOptions() {
+      return this.adminStore.providers.map((provider) => provider.name)
+    },
+    contractOptions() {
+      return this.contractStore.contracts.map((contract) => contract.contract_name)
+    },
   },
   methods: {
     ...mapActions(useBillStore, ['fetchBills', 'addBill']),
+    ...mapActions(useAdminStore, ['fetchProviders']),
+    ...mapActions(useContractStore, ['fetchContracts']),
     resetFilters() {
       this.filters = {
         provider: '',
@@ -394,6 +392,8 @@ export default {
   },
   created() {
     this.fetchBills()
+    this.fetchProviders()
+    this.fetchContracts()
   },
   watch: {
     activeTab() {

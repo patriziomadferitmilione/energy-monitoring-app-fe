@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { globalBaseUrl } from 'src/boot/global'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    // baseUrl: 'http://localhost:5000',
-    baseUrl: 'https://backend.bollettify.com',
     isAuthenticated: !!localStorage.getItem('token'),
     loggedUser: JSON.parse(localStorage.getItem('loggedUser')) || null,
   }),
@@ -12,9 +11,9 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(credentials) {
       try {
-        const response = await axios.post(`${this.baseUrl}/api/auth/login`, credentials)
+        const response = await axios.post(`${globalBaseUrl}/api/auth/login`, credentials)
         const user = response.data
-        console.log('login res', response)
+        // console.log('login res', response)
         localStorage.setItem('token', user.token)
         localStorage.setItem('loggedUser', JSON.stringify(user))
         localStorage.setItem('authenticated', 'true')
@@ -44,7 +43,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const response = await axios.get(`${this.baseUrl}/api/auth/verify`, {
+        const response = await axios.get(`${globalBaseUrl}/api/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 

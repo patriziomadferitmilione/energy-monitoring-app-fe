@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { globalBaseUrl } from 'src/boot/global'
 
 export const useContractStore = defineStore('contractStore', {
   state: () => ({
-    // baseUrl: 'http://localhost:5000',
-    baseUrl: 'https://backend.bollettify.com',
     contracts: [],
     loading: false,
     showDialog: false,
@@ -29,7 +28,7 @@ export const useContractStore = defineStore('contractStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/contracts`, {
+        const response = await axios.get(`${globalBaseUrl}/api/contracts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.contracts = response.data
@@ -43,13 +42,13 @@ export const useContractStore = defineStore('contractStore', {
     async addContract() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.post(`${this.baseUrl}/api/contracts`, this.newContract, {
+        const response = await axios.post(`${globalBaseUrl}/api/contracts`, this.newContract, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
-        this.contracts.push(response.data) // Add new contract to the list
+        this.contracts.push(response.data)
         this.closeDialog()
         this.resetNewContract()
       } catch (error) {

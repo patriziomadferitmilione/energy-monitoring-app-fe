@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { globalBaseUrl } from 'src/boot/global'
 
 export const useBillStore = defineStore('billStore', {
   state: () => ({
-    // baseUrl: 'http://localhost:5000',
-    baseUrl: 'https://backend.bollettify.com',
     bills: [],
     contracts: [],
     loading: false,
@@ -12,8 +11,7 @@ export const useBillStore = defineStore('billStore', {
     pdfFile: null,
     newBill: {
       user_id: null,
-      contract_id: null,
-      customerCode: '',
+      contract_name: '',
       bill_type: '',
       provider: '',
       bill_number: '',
@@ -22,7 +20,7 @@ export const useBillStore = defineStore('billStore', {
       due_date: '',
       issue_date: '',
       meter_number: '',
-      currency: '€',
+      // currency: '€',
       status: 'pending',
       expenses: {
         total_amount: null,
@@ -76,7 +74,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/bills`, {
+        const response = await axios.get(`${globalBaseUrl}/api/bills`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.bills = response.data
@@ -90,13 +88,13 @@ export const useBillStore = defineStore('billStore', {
     async addBill() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.post(`${this.baseUrl}/api/bills`, this.newBill, {
+        const response = await axios.post(`${globalBaseUrl}/api/bills`, this.newBill, {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         })
 
         if (response.status === 201) {
           this.bills.push(response.data)
-          this.resetForm() // Reset after successful save
+          this.resetForm()
         } else {
           console.error('Failed to add bill')
         }
@@ -137,7 +135,7 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/contracts`, {
+        const response = await axios.get(`${globalBaseUrl}/api/contracts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.contracts = response.data
@@ -152,10 +150,10 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/bills/summary`, {
+        const response = await axios.get(`${globalBaseUrl}/api/bills/summary`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        console.log('fetch bills summary', response)
+        // console.log('fetch bills summary', response)
         this.billSummary = response.data
       } catch (error) {
         console.error('Error fetching bill summary:', error)
@@ -168,10 +166,10 @@ export const useBillStore = defineStore('billStore', {
       this.loading = true
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/bills/unpaid`, {
+        const response = await axios.get(`${globalBaseUrl}/api/bills/unpaid`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        console.log('unpaid', response)
+        // console.log('unpaid', response)
         this.unpaidBills = response.data
       } catch (error) {
         console.error('Error fetching unpaid bills:', error)
@@ -184,7 +182,7 @@ export const useBillStore = defineStore('billStore', {
       try {
         const token = localStorage.getItem('token')
         await axios.put(
-          `${this.baseUrl}/api/bills/${billId}`,
+          `${globalBaseUrl}/api/bills/${billId}`,
           { status: newStatus },
           { headers: { Authorization: `Bearer ${token}` } },
         )
@@ -205,7 +203,7 @@ export const useBillStore = defineStore('billStore', {
     async fetchOverdueBills() {
       try {
         const token = localStorage.getItem('token')
-        const response = await axios.get(`${this.baseUrl}/api/bills/overdue`, {
+        const response = await axios.get(`${globalBaseUrl}/api/bills/overdue`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         this.overdueBills = response.data
@@ -224,31 +222,21 @@ export const useBillStore = defineStore('billStore', {
       formData.append('pdfFile', this.pdfFile)
 
       const token = localStorage.getItem('token')
-      const loggedUser = JSON.parse(localStorage.getItem('loggedUser')) // Get user data
+      const loggedUser = JSON.parse(localStorage.getItem('loggedUser'))
 
       if (!loggedUser) {
         console.error('🚨 No logged-in user found.')
         return
       }
 
-      console.log(
-        '📤 Uploading PDF file:',
-        this.pdfFile,
-        'for user:',
-        loggedUser.firstName,
-        loggedUser.lastName,
-      )
-
       try {
-        let response = await axios.post(`${this.baseUrl}/api/bills/upload`, formData, {
+        let response = await axios.post(`${globalBaseUrl}/api/bills/upload`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
           params: { userName: `${loggedUser.firstName}_${loggedUser.lastName}` },
         })
-
-        console.log('✅ Server Response:', response.data)
 
         if (response.data.structuredData) {
           this.populateBillForm(response.data.structuredData)
@@ -266,7 +254,6 @@ export const useBillStore = defineStore('billStore', {
       const formatDateForInput = (dateStr) => {
         if (!dateStr) return ''
 
-        // Handle "05 Marzo 2025" format
         const monthNames = {
           Gennaio: '01',
           Febbraio: '02',
@@ -335,13 +322,6 @@ export const useBillStore = defineStore('billStore', {
         },
         user: {
           name: data.user.name || '',
-          // address: {
-          //   street: data.user.address.street || '',
-          //   civic_number: data.user.address.civic_number || '',
-          //   cap: data.user.address.cap || '',
-          //   city: data.user.address.city || '',
-          //   province: data.user.address.province || '',
-          // },
         },
       }
     },
