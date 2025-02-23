@@ -2,16 +2,27 @@
   <q-page class="q-pa-md">
     <h4 class="text-center">Bollette</h4>
 
-    <q-btn color="primary" label="Nuova Bolletta" @click="billStore.openDialog()" class="q-mb-md" />
-
-    <q-file
-      v-model="billStore.pdfFile"
-      label="Carica Bolletta (PDF)"
-      accept=".pdf"
-      class="q-mb-md"
-    />
-
-    <q-btn label="Estrai Dati" color="primary" @click="billStore.uploadPDF" />
+    <div class="row">
+      <div class="col col-12 col-md-4">
+        <q-btn
+          color="primary"
+          label="Nuova Bolletta"
+          @click="billStore.openDialog()"
+          class="q-mb-md"
+        />
+      </div>
+      <div class="col col-12 col-md-4">
+        <q-file
+          v-model="billStore.pdfFile"
+          label="Carica Bolletta (PDF)"
+          accept=".pdf"
+          class="q-mb-md"
+        />
+      </div>
+      <div class="col col-12 col-md-4">
+        <q-btn label="Estrai Dati" color="primary" @click="billStore.uploadPDF" />
+      </div>
+    </div>
 
     <!-- Filters Dropdown -->
     <q-expansion-item expand-separator label="Filtri" class="q-mt-md">
@@ -402,3 +413,13 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.q-tab {
+  width: 50%;
+}
+
+.col {
+  text-align: center;
+}
+</style>

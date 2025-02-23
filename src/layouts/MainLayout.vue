@@ -9,8 +9,8 @@
     </q-header>
 
     <!-- Sidebar (Navigation Drawer) -->
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list class="full-height flex column">
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="full-height">
+      <q-list class="column fit">
         <!-- Tariff Card -->
         <q-item class="text-center">
           <q-item-section>Orario corrente</q-item-section>
@@ -26,6 +26,7 @@
 
         <q-separator />
 
+        <!-- Navigation Links -->
         <q-item clickable v-ripple to="/" exact>
           <q-item-section avatar>
             <q-icon name="home" />
@@ -54,9 +55,10 @@
           <q-item-section>Contracts</q-item-section>
         </q-item>
 
+        <!-- Pushes Logout Button to the Bottom -->
         <q-space />
 
-        <q-item clickable v-ripple @click="logout" class="text-negative">
+        <q-item clickable v-ripple @click="logout" class="text-negative logout">
           <q-item-section avatar>
             <q-icon name="logout" />
           </q-item-section>
@@ -140,3 +142,16 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.q-list {
+  background-color: #cccccc;
+  border-radius: 0;
+  color: #3a3238;
+}
+
+.logout {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+</style>

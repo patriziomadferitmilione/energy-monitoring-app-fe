@@ -7,3 +7,50 @@ h5,
 h6 {
   margin: 1rem 0 1rem 0;
 }
+
+body {
+  background-color: $grey;
+}
+
+// Scrollbar
+::-webkit-scrollbar {
+  background-color: $primary;
+}
+::-webkit-scrollbar-thumb {
+  background-color: $secondary;
+  border-radius: 15px;
+}
+
+// Sidebar
+.q-drawer {
+  position: fixed;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.q-drawer__content {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+// Card
+.q-card {
+  background-color: $light2;
+}
+
+// List
+.q-list {
+  background-color: $light;
+  border-radius: 4px;
+}
+
+.q-item {
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+// Tabs
+.q-tabs {
+  border-radius: 4px;
+}
+
+.q-tab-panels {
+  background-color: transparent;
+}

@@ -300,7 +300,7 @@ export default {
         labels: labels.length > 0 ? labels : ['No Data'],
         datasets: [
           {
-            label: 'Spese totali (€)',
+            label: '',
             backgroundColor: (ctx) => {
               const canvas = ctx.chart.ctx
               const gradient = canvas.createLinearGradient(0, 0, 0, 400)
