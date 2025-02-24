@@ -54,6 +54,9 @@ export const useBillStore = defineStore('billStore', {
         },
       },
     },
+    providerDialog: false,
+    selectedProvider: null,
+    selectedBillType: null,
   }),
 
   getters: {
@@ -92,6 +95,40 @@ export const useBillStore = defineStore('billStore', {
     },
 
     async addBill() {
+      // Required fields list
+      const requiredFields = {
+        contract_name: 'Contratto',
+        bill_type: 'Tipo di Bolletta',
+        provider: 'Fornitore',
+        bill_number: 'Numero Fattura',
+        billing_period_start: 'Inizio Periodo',
+        billing_period_end: 'Fine Periodo',
+        'consumption.unit': 'Unità di Consumo',
+      }
+
+      // Check if any required field is missing
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => {
+          const value = key.includes('.')
+            ? key.split('.').reduce((obj, k) => (obj ? obj[k] : undefined), this.newBill)
+            : this.newBill[key]
+
+          return !value
+        })
+        .map((entry) => entry[1])
+
+      if (missingFields.length > 0) {
+        Notify.create({
+          message: `Campi obbligatori mancanti: ${missingFields.join(', ')}`,
+          color: 'warning',
+          icon: 'error',
+          position: 'bottom',
+        })
+        return
+      }
+
+      console.log(missingFields)
+
       try {
         const token = localStorage.getItem('token')
         const response = await axios.post(`${globalBaseUrl}/api/bills`, this.newBill, {
@@ -112,12 +149,27 @@ export const useBillStore = defineStore('billStore', {
         }
       } catch (error) {
         console.error('Error saving bill:', error)
-        Notify.create({
-          message: error.response?.data?.message || 'Errore nella creazione della bolletta',
-          color: 'negative',
-          icon: 'error',
-          position: 'bottom',
-        })
+
+        // If backend returns validation errors, display them
+        if (error.response?.data?.error?.errors) {
+          const errorMessages = Object.values(error.response.data.error.errors)
+            .map((err) => err.message)
+            .join(', ')
+
+          Notify.create({
+            message: `Errore: ${errorMessages}`,
+            color: 'negative',
+            icon: 'error',
+            position: 'bottom',
+          })
+        } else {
+          Notify.create({
+            message: error.response?.data?.message || 'Errore nella creazione della bolletta',
+            color: 'negative',
+            icon: 'error',
+            position: 'bottom',
+          })
+        }
       }
     },
 
@@ -147,6 +199,7 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
+    // DASHBOARD
     async fetchBillSummary() {
       this.loading = true
       try {
@@ -239,6 +292,30 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
+    // UPLOAD
+    openProviderDialog() {
+      this.providerDialog = true
+    },
+
+    closeProviderDialog() {
+      this.providerDialog = false
+    },
+
+    async confirmUpload() {
+      if (!this.selectedProvider || !this.selectedBillType) {
+        Notify.create({
+          message: 'Seleziona il fornitore e il tipo di bolletta prima di caricare il file',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
+        return
+      }
+
+      this.uploadPDF()
+      this.closeProviderDialog()
+    },
+
     async uploadPDF() {
       if (!this.pdfFile) {
         Notify.create({
@@ -252,22 +329,16 @@ export const useBillStore = defineStore('billStore', {
 
       let formData = new FormData()
       formData.append('pdfFile', this.pdfFile)
+      formData.append('provider', this.selectedProvider)
+      formData.append('bill_type', this.selectedBillType)
 
       const token = localStorage.getItem('token')
-      const loggedUser = JSON.parse(localStorage.getItem('loggedUser'))
-
-      if (!loggedUser) {
-        console.error('🚨 No logged-in user found.')
-        return
-      }
-
       try {
         let response = await axios.post(`${globalBaseUrl}/api/bills/upload`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
-          params: { userName: `${loggedUser.firstName}_${loggedUser.lastName}` },
         })
 
         if (response.data.structuredData) {

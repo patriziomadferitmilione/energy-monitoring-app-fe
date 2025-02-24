@@ -20,7 +20,7 @@
         />
       </div>
       <div class="col col-12 col-md-4">
-        <q-btn label="Estrai Dati" color="primary" @click="billStore.uploadPDF" />
+        <q-btn label="Estrai Dati" color="primary" @click="billStore.openProviderDialog()" />
       </div>
     </div>
 
@@ -317,6 +317,38 @@
         <q-card-actions align="right">
           <q-btn flat label="Annulla" color="negative" @click="billStore.closeDialog()" />
           <q-btn label="Salva" color="primary" @click="saveBill" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Upload Dialog -->
+    <q-dialog v-model="billStore.providerDialog">
+      <q-card style="width: 400px">
+        <q-card-section>
+          <div class="text-h6">Seleziona il Fornitore e il Tipo di Bolletta</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-select
+            v-model="billStore.selectedProvider"
+            label="Fornitore"
+            :options="distinctProviders"
+            clearable
+            class="q-mb-md"
+          />
+
+          <q-select
+            v-model="billStore.selectedBillType"
+            label="Tipo di Bolletta"
+            :options="['energy', 'gas']"
+            clearable
+            class="q-mb-md"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Annulla" color="negative" @click="billStore.closeProviderDialog()" />
+          <q-btn label="Conferma" color="primary" @click="billStore.confirmUpload()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
