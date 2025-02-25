@@ -155,6 +155,7 @@ export const useAdminStore = defineStore('adminStore', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
         this.providers = response.data
+        console.log(this.providers)
       } catch (error) {
         console.error('Error fetching providers:', error)
         Notify.create({

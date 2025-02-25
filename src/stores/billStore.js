@@ -25,6 +25,7 @@ export const useBillStore = defineStore('billStore', {
       expenses: {
         total_amount: null,
         energy: null,
+        gas: null,
         transport: null,
         system_duties: null,
         taxes: null,
@@ -103,7 +104,6 @@ export const useBillStore = defineStore('billStore', {
         bill_number: 'Numero Fattura',
         billing_period_start: 'Inizio Periodo',
         billing_period_end: 'Fine Periodo',
-        'consumption.unit': 'Unità di Consumo',
       }
 
       // Check if any required field is missing
@@ -144,6 +144,7 @@ export const useBillStore = defineStore('billStore', {
             color: 'positive',
             position: 'bottom',
           })
+          this.showDialog = false
         } else {
           console.error('Failed to add bill')
         }
@@ -342,6 +343,7 @@ export const useBillStore = defineStore('billStore', {
         })
 
         if (response.data.structuredData) {
+          console.log('structured data', response.data.structuredData)
           this.populateBillForm(response.data.structuredData)
           this.openDialog()
 
@@ -402,7 +404,6 @@ export const useBillStore = defineStore('billStore', {
         billing_period_end: formatDateForInput(data.billing_period_end),
         due_date: formatDateForInput(data.due_date),
         issue_date: formatDateForInput(data.issue_date),
-        currency: data.currency || '€',
         status: data.status || 'pending',
       }
     },

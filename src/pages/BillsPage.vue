@@ -188,8 +188,16 @@
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.expenses.energy"
             label="Energia (€)"
+            type="number"
+            class="q-mb-md"
+          />
+          <q-input
+            v-if="billStore.newBill.bill_type === 'gas'"
+            v-model.number="billStore.newBill.expenses.gas"
+            label="Gas (€)"
             type="number"
             class="q-mb-md"
           />
@@ -233,20 +241,23 @@
             class="q-mb-md"
           />
 
-          <!-- Breakdown of Consumption (F1, F2, F3) -->
+          <!-- Breakdown of ENERGY Consumption (F1, F2, F3) -->
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f1_unit_price"
             label="Prezzo F1 (€)"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f1_quantity"
             label="Quantità F1"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f1_value"
             label="Valore F1 (€)"
             type="number"
@@ -254,18 +265,21 @@
           />
 
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f2_unit_price"
             label="Prezzo F2 (€)"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f2_quantity"
             label="Quantità F2"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f2_value"
             label="Valore F2 (€)"
             type="number"
@@ -273,18 +287,21 @@
           />
 
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f3_unit_price"
             label="Prezzo F3 (€)"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f3_quantity"
             label="Quantità F3"
             type="number"
             class="q-mb-md"
           />
           <q-input
+            v-if="billStore.newBill.bill_type === 'energy'"
             v-model.number="billStore.newBill.consumption.f3_value"
             label="Valore F3 (€)"
             type="number"
@@ -311,7 +328,6 @@
             type="date"
             class="q-mb-md"
           />
-          <!-- <q-input v-model="billStore.newBill.currency" label="Valuta" class="q-mb-md" /> -->
         </q-card-section>
 
         <q-card-actions align="right">
@@ -332,7 +348,7 @@
           <q-select
             v-model="billStore.selectedProvider"
             label="Fornitore"
-            :options="distinctProviders"
+            :options="providerOptions"
             clearable
             class="q-mb-md"
           />
