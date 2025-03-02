@@ -1,128 +1,184 @@
 <template>
   <q-page class="q-pa-md">
-    <h4 class="text-center">Gestione Utenti e Provider</h4>
-
-    <div class="q-mb-md">
-      <q-btn
-        color="primary"
-        label="Nuovo Utente"
-        @click="adminStore.openUserDialog()"
-        class="q-mr-md"
-      />
-      <q-btn color="secondary" label="Nuovo Provider" @click="adminStore.openProviderDialog()" />
+    <div class="row justify-between items-center">
+      <h4 class="text-primary">Gestione Utenti e Provider</h4>
+      <div>
+        <q-btn
+          color="primary"
+          label="Nuovo Utente"
+          icon="person_add"
+          @click="adminStore.openUserDialog()"
+          class="q-mr-md"
+        />
+        <q-btn
+          color="secondary"
+          label="Nuovo Provider"
+          icon="business"
+          @click="adminStore.openProviderDialog()"
+        />
+      </div>
     </div>
 
-    <!-- USER -->
-    <h5>Utenti</h5>
-    <q-list bordered separator v-if="users.length">
-      <q-item v-for="user in users" :key="user._id">
-        <q-item-section>
-          <q-item-label>{{ user.first_name }} {{ user.last_name }}</q-item-label>
-          <q-item-label caption>Email: {{ user.email }}</q-item-label>
-          <q-item-label caption>Ruolo: {{ user.role }}</q-item-label>
-          <q-item-label caption>Telefono: {{ user.phone || 'N/A' }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            icon="edit"
-            color="primary"
-            @click="adminStore.openEditUserDialog(user)"
-            class="q-mr-md"
-          />
-          <q-btn icon="delete" color="negative" @click="adminStore.deleteUser(user._id)" />
-        </q-item-section>
-      </q-item>
-    </q-list>
-    <q-banner v-else class="bg-warning text-dark"> Nessun utente disponibile. </q-banner>
+    <q-separator class="q-my-md" />
 
-    <!-- Add User Dialog -->
+    <!-- USERS LIST -->
+    <q-card flat bordered class="q-mb-md">
+      <q-card-section class="bg-primary text-white">
+        <div class="text-h6">Utenti</div>
+      </q-card-section>
+
+      <q-card-section>
+        <div v-if="users.length" class="row q-col-gutter-md">
+          <div v-for="user in users" :key="user._id" class="col-12 col-sm-6 col-md-4">
+            <q-card class="user-card">
+              <q-card-section>
+                <div class="text-h6">{{ user.first_name }} {{ user.last_name }}</div>
+                <div class="text-caption">{{ user.role.toUpperCase() }}</div>
+              </q-card-section>
+
+              <q-card-section>
+                <div class="text-body2"><q-icon name="email" /> {{ user.email }}</div>
+                <div class="text-body2"><q-icon name="phone" /> {{ user.phone || 'N/A' }}</div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-actions align="right">
+                <q-btn flat icon="edit" color="info" @click="adminStore.openEditUserDialog(user)" />
+                <q-btn flat icon="delete" color="negative" @click="confirmDeleteUser(user._id)" />
+              </q-card-actions>
+            </q-card>
+          </div>
+        </div>
+
+        <q-banner v-else class="bg-warning text-dark"> Nessun utente disponibile. </q-banner>
+      </q-card-section>
+    </q-card>
+
+    <!-- PROVIDERS LIST -->
+    <q-card flat bordered>
+      <q-card-section class="bg-secondary text-white">
+        <div class="text-h6">Providers</div>
+      </q-card-section>
+
+      <q-card-section>
+        <div v-if="providers.length" class="row q-col-gutter-md">
+          <div v-for="provider in providers" :key="provider._id" class="col-12 col-sm-6 col-md-4">
+            <q-card class="provider-card">
+              <q-card-section>
+                <div class="text-h6">{{ provider.name }}</div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  icon="edit"
+                  color="info"
+                  @click="adminStore.openEditProviderDialog(provider)"
+                />
+                <q-btn
+                  flat
+                  icon="delete"
+                  color="negative"
+                  @click="confirmDeleteProvider(provider._id)"
+                />
+              </q-card-actions>
+            </q-card>
+          </div>
+        </div>
+
+        <q-banner v-else class="bg-warning text-dark"> Nessun provider disponibile. </q-banner>
+      </q-card-section>
+    </q-card>
+
+    <!-- ADD / EDIT USER DIALOG -->
     <q-dialog v-model="adminStore.showUserDialog">
-      <q-card style="width: 450px">
+      <q-card style="max-width: 500px">
         <q-card-section>
           <div class="text-h6">
             {{ adminStore.isEditingUser ? 'Modifica Utente' : 'Aggiungi Nuovo Utente' }}
           </div>
         </q-card-section>
+
         <q-card-section>
           <q-select
             v-model="adminStore.newUser.role"
             label="Ruolo"
             :options="['admin', 'user']"
+            dense
+            outlined
             class="q-mb-md"
           />
-          <q-input v-model="adminStore.newUser.first_name" label="Nome" class="q-mb-md" />
-          <q-input v-model="adminStore.newUser.last_name" label="Cognome" class="q-mb-md" />
-          <q-input v-model="adminStore.newUser.email" label="Email" class="q-mb-md" />
-          <q-input v-model="adminStore.newUser.phone" label="Telefono" class="q-mb-md" />
+          <q-input
+            v-model="adminStore.newUser.first_name"
+            label="Nome"
+            dense
+            outlined
+            class="q-mb-md"
+          />
+          <q-input
+            v-model="adminStore.newUser.last_name"
+            label="Cognome"
+            dense
+            outlined
+            class="q-mb-md"
+          />
+          <q-input
+            v-model="adminStore.newUser.email"
+            label="Email"
+            dense
+            outlined
+            class="q-mb-md"
+          />
+          <q-input
+            v-model="adminStore.newUser.phone"
+            label="Telefono"
+            dense
+            outlined
+            class="q-mb-md"
+          />
           <q-input
             v-model="adminStore.newUser.password"
             label="Password"
             type="password"
+            dense
+            outlined
             class="q-mb-md"
             v-if="!adminStore.isEditingUser"
           />
         </q-card-section>
+
         <q-card-actions align="right">
           <q-btn flat label="Annulla" color="negative" @click="adminStore.closeUserDialog()" />
-          <q-btn
-            label="Salva"
-            color="primary"
-            @click="
-              adminStore.newUser.first_name &&
-              adminStore.newUser.last_name &&
-              adminStore.newUser.email &&
-              adminStore.newUser.role &&
-              (!adminStore.isEditingUser ? adminStore.newUser.password : true)
-                ? adminStore.isEditingUser
-                  ? adminStore.updateUser()
-                  : adminStore.addUser()
-                : $q.notify({ type: 'negative', message: 'Compila tutti i campi obbligatori' })
-            "
-          />
+          <q-btn label="Salva" color="primary" @click="saveUser" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <!-- PROVIDERS -->
-    <h5 class="q-mt-md">Providers</h5>
-    <q-list bordered separator v-if="providers.length">
-      <q-item v-for="provider in providers" :key="provider._id">
-        <q-item-section>
-          <q-item-label>{{ provider.name }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            icon="edit"
-            color="primary"
-            @click="adminStore.openEditProviderDialog(provider)"
-            class="q-mr-md"
-          />
-          <q-btn icon="delete" color="negative" @click="adminStore.deleteProvider(provider._id)" />
-        </q-item-section>
-      </q-item>
-    </q-list>
-    <q-banner v-else class="bg-warning text-dark"> Nessun provider disponibile. </q-banner>
-
-    <!-- Add Provider Dialog -->
+    <!-- ADD / EDIT PROVIDER DIALOG -->
     <q-dialog v-model="adminStore.showProviderDialog">
-      <q-card style="width: 450px">
+      <q-card style="max-width: 500px">
         <q-card-section>
           <div class="text-h6">
             {{ adminStore.isEditingProvider ? 'Modifica Provider' : 'Aggiungi Nuovo Provider' }}
           </div>
         </q-card-section>
+
         <q-card-section>
-          <q-input v-model="adminStore.newProvider.name" label="Nome Provider" class="q-mb-md" />
+          <q-input
+            v-model="adminStore.newProvider.name"
+            label="Nome Provider"
+            dense
+            outlined
+            class="q-mb-md"
+          />
         </q-card-section>
+
         <q-card-actions align="right">
           <q-btn flat label="Annulla" color="negative" @click="adminStore.closeProviderDialog()" />
-          <q-btn
-            label="Salva"
-            color="primary"
-            @click="
-              adminStore.isEditingProvider ? adminStore.updateProvider() : adminStore.addProvider()
-            "
-          />
+          <q-btn label="Salva" color="primary" @click="saveProvider" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -145,6 +201,43 @@ export default {
     },
     providers() {
       return this.adminStore.providers
+    },
+  },
+  methods: {
+    saveUser() {
+      if (
+        !this.adminStore.newUser.first_name ||
+        !this.adminStore.newUser.last_name ||
+        !this.adminStore.newUser.email ||
+        !this.adminStore.newUser.role ||
+        (!this.adminStore.isEditingUser ? !this.adminStore.newUser.password : false)
+      ) {
+        this.$q.notify({ type: 'negative', message: 'Compila tutti i campi obbligatori' })
+        return
+      }
+      this.adminStore.isEditingUser ? this.adminStore.updateUser() : this.adminStore.addUser()
+    },
+
+    saveProvider() {
+      if (!this.adminStore.newProvider.name) {
+        this.$q.notify({ type: 'negative', message: 'Inserisci il nome del provider' })
+        return
+      }
+      this.adminStore.isEditingProvider
+        ? this.adminStore.updateProvider()
+        : this.adminStore.addProvider()
+    },
+
+    confirmDeleteUser(userId) {
+      if (confirm('Sei sicuro di voler eliminare questo utente?')) {
+        this.adminStore.deleteUser(userId)
+      }
+    },
+
+    confirmDeleteProvider(providerId) {
+      if (confirm('Sei sicuro di voler eliminare questo provider?')) {
+        this.adminStore.deleteProvider(providerId)
+      }
     },
   },
   created() {

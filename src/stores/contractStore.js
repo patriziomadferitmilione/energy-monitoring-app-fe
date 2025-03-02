@@ -8,6 +8,7 @@ export const useContractStore = defineStore('contractStore', {
     contracts: [],
     loading: false,
     showDialog: false,
+    editContractId: null,
     newContract: {
       supply_type: '',
       name: '',
@@ -76,12 +77,72 @@ export const useContractStore = defineStore('contractStore', {
       }
     },
 
-    openDialog() {
+    async updateContract() {
+      if (!this.editContractId) return
+
+      try {
+        const token = localStorage.getItem('token')
+        const response = await axios.put(
+          `${globalBaseUrl}/api/contracts/${this.editContractId}`,
+          this.newContract,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+
+        const index = this.contracts.findIndex((contract) => contract._id === this.editContractId)
+        if (index !== -1) {
+          this.contracts[index] = response.data
+        }
+
+        this.closeDialog()
+        Notify.create({ message: 'Contratto aggiornato correttamente', color: 'positive' })
+      } catch (error) {
+        console.error('Error updating contract:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nell’aggiornamento del contratto',
+          color: 'negative',
+          icon: 'error',
+        })
+      }
+    },
+
+    async deleteContract(contractId) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.delete(`${globalBaseUrl}/api/contracts/${contractId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        this.contracts = this.contracts.filter((contract) => contract._id !== contractId)
+
+        Notify.create({ message: 'Contratto eliminato correttamente', color: 'positive' })
+      } catch (error) {
+        console.error('Error deleting contract:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore nella cancellazione del contratto',
+          color: 'negative',
+          icon: 'error',
+        })
+      }
+    },
+
+    openDialog(contract = null) {
+      if (contract) {
+        this.editContractId = contract._id
+        this.newContract = { ...contract }
+      } else {
+        this.resetNewContract()
+      }
       this.showDialog = true
     },
 
     closeDialog() {
       this.showDialog = false
+      this.resetNewContract()
     },
 
     resetNewContract() {
@@ -100,6 +161,7 @@ export const useContractStore = defineStore('contractStore', {
         contract_end_date: '',
         billing_frequency: '',
       }
+      this.editContractId = null
     },
   },
 })

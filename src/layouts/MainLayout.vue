@@ -13,7 +13,7 @@
       <q-list class="column fit">
         <!-- Tariff Card -->
         <q-item class="text-center">
-          <q-item-section>Orario corrente</q-item-section>
+          <q-item-section>Fascia oraria attuale</q-item-section>
         </q-item>
         <q-item>
           <q-card class="q-pa-none full-width min-h-12" :class="tariffClass">
@@ -45,14 +45,14 @@
           <q-item-section avatar>
             <q-icon name="receipt_long" />
           </q-item-section>
-          <q-item-section>Bills</q-item-section>
+          <q-item-section>Bollette</q-item-section>
         </q-item>
 
         <q-item clickable v-ripple to="/contracts">
           <q-item-section avatar>
             <q-icon name="description" />
           </q-item-section>
-          <q-item-section>Contracts</q-item-section>
+          <q-item-section>Forniture</q-item-section>
         </q-item>
 
         <!-- Pushes Logout Button to the Bottom -->

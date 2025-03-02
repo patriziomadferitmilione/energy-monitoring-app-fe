@@ -9,6 +9,7 @@ export const useBillStore = defineStore('billStore', {
     contracts: [],
     loading: false,
     showDialog: false,
+    editingBillId: null,
     pdfFile: null,
     newBill: {
       user_id: null,
@@ -20,7 +21,7 @@ export const useBillStore = defineStore('billStore', {
       billing_period_end: '',
       due_date: '',
       issue_date: '',
-      meter_number: '',
+      // meter_number: '',
       status: 'pending',
       expenses: {
         total_amount: null,
@@ -127,8 +128,6 @@ export const useBillStore = defineStore('billStore', {
         return
       }
 
-      console.log(missingFields)
-
       try {
         const token = localStorage.getItem('token')
         const response = await axios.post(`${globalBaseUrl}/api/bills`, this.newBill, {
@@ -183,7 +182,7 @@ export const useBillStore = defineStore('billStore', {
         billing_period_end: '',
         due_date: '',
         issue_date: '',
-        meter_number: '',
+        // meter_number: '',
         status: 'pending',
         expenses: {
           total_amount: null,
@@ -334,6 +333,7 @@ export const useBillStore = defineStore('billStore', {
       formData.append('bill_type', this.selectedBillType)
 
       const token = localStorage.getItem('token')
+      // console.log('form data', formData)
       try {
         let response = await axios.post(`${globalBaseUrl}/api/bills/upload`, formData, {
           headers: {
@@ -343,7 +343,7 @@ export const useBillStore = defineStore('billStore', {
         })
 
         if (response.data.structuredData) {
-          console.log('structured data', response.data.structuredData)
+          // console.log('structured data', response.data.structuredData)
           this.populateBillForm(response.data.structuredData)
           this.openDialog()
 
@@ -369,24 +369,27 @@ export const useBillStore = defineStore('billStore', {
         if (!dateStr) return ''
 
         const monthNames = {
-          Gennaio: '01',
-          Febbraio: '02',
-          Marzo: '03',
-          Aprile: '04',
-          Maggio: '05',
-          Giugno: '06',
-          Luglio: '07',
-          Agosto: '08',
-          Settembre: '09',
-          Ottobre: '10',
-          Novembre: '11',
-          Dicembre: '12',
+          gennaio: '01',
+          febbraio: '02',
+          marzo: '03',
+          aprile: '04',
+          maggio: '05',
+          giugno: '06',
+          luglio: '07',
+          agosto: '08',
+          settembre: '09',
+          ottobre: '10',
+          novembre: '11',
+          dicembre: '12',
         }
 
         let dateParts = dateStr.split(' ')
         if (dateParts.length === 3) {
           let [day, month, year] = dateParts
-          month = monthNames[month] || '01'
+          console.log('day', day)
+          console.log('month', month)
+          console.log('year', year)
+          month = monthNames[month.toLowerCase()] || '01'
           return `${year}-${month}-${day.padStart(2, '0')}`
         }
 

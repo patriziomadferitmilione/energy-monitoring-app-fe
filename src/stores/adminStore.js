@@ -10,6 +10,8 @@ export const useAdminStore = defineStore('adminStore', {
     loading: false,
     showUserDialog: false,
     showProviderDialog: false,
+    editingUserId: null,
+    editingProviderId: null,
     newUser: {
       role: '',
       first_name: '',
@@ -95,21 +97,17 @@ export const useAdminStore = defineStore('adminStore', {
         if (index !== -1) {
           this.users[index] = response.data
         }
+
         this.closeUserDialog()
         this.resetNewUser()
 
-        Notify.create({
-          message: 'Utente aggiornato correttamente',
-          color: 'positive',
-          position: 'bottom',
-        })
+        Notify.create({ message: 'Utente aggiornato correttamente', color: 'positive' })
       } catch (error) {
         console.error('Error updating user:', error)
         Notify.create({
-          message: error.message || 'Errore nella modifica utente',
+          message: error.response?.data?.message || 'Errore nella modifica utente',
           color: 'negative',
           icon: 'error',
-          position: 'bottom',
         })
       }
     },
@@ -138,13 +136,22 @@ export const useAdminStore = defineStore('adminStore', {
     },
 
     openUserDialog() {
+      this.resetNewUser()
       this.showUserDialog = true
     },
+    openEditUserDialog(user) {
+      this.editingUserId = user._id
+      this.newUser = { ...user, password: '' } // Avoid displaying existing passwords
+      this.showUserDialog = true
+    },
+
     closeUserDialog() {
       this.showUserDialog = false
+      this.resetNewUser()
     },
     resetNewUser() {
       this.newUser = { role: '', first_name: '', last_name: '', email: '', phone: '', password: '' }
+      this.editingUserId = null
     },
 
     // Provider Management
@@ -259,13 +266,24 @@ export const useAdminStore = defineStore('adminStore', {
     },
 
     openProviderDialog() {
+      this.resetNewProvider()
       this.showProviderDialog = true
     },
+
+    openEditProviderDialog(provider) {
+      this.editingProviderId = provider._id
+      this.newProvider = { ...provider }
+      this.showProviderDialog = true
+    },
+
     closeProviderDialog() {
       this.showProviderDialog = false
+      this.resetNewProvider()
     },
+
     resetNewProvider() {
       this.newProvider = { name: '' }
+      this.editingProviderId = null
     },
   },
 })
