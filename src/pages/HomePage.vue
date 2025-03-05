@@ -461,7 +461,7 @@ export default {
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: lighten($light2, 3%);
+    background-color: color.adjust($color, $lightness: 3%);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
   }
 
