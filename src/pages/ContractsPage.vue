@@ -45,7 +45,13 @@
           <q-separator />
 
           <q-card-actions align="right">
-            <q-btn flat icon="edit" label="Modifica" color="info" @click="editContract(contract)" />
+            <q-btn
+              flat
+              icon="edit"
+              label="Modifica"
+              color="primary"
+              @click="editContract(contract)"
+            />
             <q-btn
               flat
               icon="delete"
@@ -63,111 +69,115 @@
 
     <!-- Add Contract Dialog -->
     <q-dialog v-model="contractStore.showDialog">
-      <q-card style="max-width: 500px">
+      <q-card style="max-width: 800px; width: 90vw">
         <q-card-section>
           <div class="text-h6">Aggiungi Nuovo Contratto</div>
         </q-card-section>
 
         <q-card-section>
-          <q-select
-            v-model="contractStore.newContract.supply_type"
-            label="Tipo di Fornitura"
-            :options="['energy', 'gas']"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.name"
-            label="Nome Cliente"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.fiscal_code"
-            label="Codice Fiscale"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.supply_address"
-            label="Indirizzo Fornitura"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.billing_address"
-            label="Indirizzo Fatturazione"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.client_code"
-            label="Codice Cliente"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.contract_name"
-            label="Nome Contratto"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.contract_code"
-            label="Codice Contratto"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.consumption_since_start"
-            label="Consumo Totale"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.power_available"
-            label="Potenza Disponibile"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.supply_start_date"
-            label="Data Inizio"
-            type="date"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.contract_end_date"
-            label="Data Fine"
-            type="date"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="contractStore.newContract.billing_frequency"
-            label="Frequenza Fatturazione"
-            dense
-            outlined
-            class="q-mb-md"
-          />
+          <q-form @submit.prevent="saveContract">
+            <div class="row q-col-gutter-md">
+              <q-select
+                v-model="contractStore.newContract.supply_type"
+                label="Tipo di Fornitura"
+                :options="['energy', 'gas']"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.name"
+                label="Nome Cliente"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.fiscal_code"
+                label="Codice Fiscale"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.supply_address"
+                label="Indirizzo Fornitura"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.billing_address"
+                label="Indirizzo Fatturazione"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.client_code"
+                label="Codice Cliente"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.contract_name"
+                label="Nome Contratto"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.contract_code"
+                label="Codice Contratto"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.consumption_since_start"
+                label="Consumo Totale"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.power_available"
+                label="Potenza Disponibile"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.supply_start_date"
+                label="Data Inizio"
+                type="date"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.contract_end_date"
+                label="Data Fine"
+                type="date"
+                dense
+                outlined
+                class="col-12 col-md-6"
+              />
+              <q-input
+                v-model="contractStore.newContract.billing_frequency"
+                label="Frequenza Fatturazione"
+                dense
+                outlined
+                class="col-12"
+              />
+            </div>
+          </q-form>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Annulla" color="negative" @click="contractStore.closeDialog()" />
-          <q-btn label="Salva" color="primary" @click="saveContract" />
+          <q-btn type="submit" @click="saveContract" label="Salva" color="primary" />
         </q-card-actions>
       </q-card>
     </q-dialog>

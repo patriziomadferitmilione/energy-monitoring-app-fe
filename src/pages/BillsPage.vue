@@ -735,7 +735,7 @@ export default {
 
   computed: {
     filteredBills() {
-      return this.billStore
+      const filtered = this.billStore
         .getBillsByType(this.activeTab)
         .filter((bill) =>
           this.filters.provider
@@ -748,20 +748,12 @@ export default {
             bill.expenses.total_amount >= this.filters.amount.min &&
             bill.expenses.total_amount <= this.filters.amount.max,
         )
-        .filter((bill) =>
-          this.filters.dateStart ? bill.billing_period_start >= this.filters.dateStart : true,
-        )
-        .filter((bill) =>
-          this.filters.dateEnd ? bill.billing_period_end <= this.filters.dateEnd : true,
-        )
-        .filter((bill) => {
-          if (this.filters.showPaid === null) return true // Show all bills
-          return bill.status === 'paid' ? this.filters.showPaid : !this.filters.showPaid
-        })
+
+      return filtered
     },
     distinctProviders() {
       const providers = this.billStore.getBillsByType(this.activeTab).map((bill) => bill.provider)
-      return [...new Set(providers)] // Remove duplicates
+      return [...new Set(providers)]
     },
     providerOptions() {
       return this.adminStore.providers.map((provider) => provider.name)

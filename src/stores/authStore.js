@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', {
 
         this.isAuthenticated = true
         this.loggedUser = user
+        console.log('loggedUser', this.loggedUser)
 
         Notify.create({
           message: 'Login eseguito correttamente',
@@ -57,7 +58,11 @@ export const useAuthStore = defineStore('auth', {
       const token = localStorage.getItem('token')
 
       if (!token) {
-        this.logout()
+        localStorage.removeItem('token')
+        localStorage.removeItem('authenticated')
+        localStorage.removeItem('loggedUser')
+        this.isAuthenticated = false
+        this.loggedUser = null
         return
       }
 

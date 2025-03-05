@@ -1,64 +1,78 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="text-h3 text-center q-mb-md">Dashboard</div>
+  <q-page class="dashboard-container q-pa-md">
+    <div class="text-h3 text-center q-mb-lg dashboard-title">Dashboard Bollette</div>
 
     <!-- Bar Chart for Monthly Expenses -->
-    <q-card class="q-pa-md q-mx-auto" style="max-width: 800px; min-height: 400px">
+    <q-card class="dashboard-card expense-chart-card" elevation-3>
       <q-inner-loading :showing="initialLoading" color="primary">
         <q-spinner size="3em" />
       </q-inner-loading>
 
       <q-card-section v-if="!initialLoading" class="full-width">
-        <div class="text-h5 text-center">Spese totali mensili</div>
+        <div class="text-h5 text-center q-mb-md section-title">Spese totali mensili</div>
 
         <div v-if="chartData && chartData.labels.length" class="chart-container">
           <BarChart :data="chartData" :options="chartOptions" />
         </div>
 
-        <div v-else class="text-center text-grey">Nessun dato presente</div>
+        <div v-else class="text-center text-primary text-h4">Nessun dato presente</div>
       </q-card-section>
     </q-card>
 
     <!-- Pie Chart for Gas vs Energy -->
-    <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 600px; min-height: 400px">
+    <q-card class="dashboard-card distribution-chart-card q-mt-md" elevation-3>
       <q-card-section class="full-width">
-        <div class="text-h5 text-center">Distribuzione Spese</div>
+        <div class="text-h5 text-center q-mb-md section-title">Distribuzione Spese</div>
 
         <div v-if="pieChartData && pieChartData.labels.length" class="chart-container">
           <PieChart :data="pieChartData" :options="pieChartOptions" />
         </div>
 
-        <div v-else class="text-center text-grey">Nessun dato presente</div>
+        <div v-else class="text-center text-primary text-h4">Nessun dato presente</div>
       </q-card-section>
     </q-card>
 
     <!-- Unpaid Bills List -->
-    <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 800px">
-      <q-card-section>
-        <div class="text-h4 text-center">Bollette Non Pagate</div>
+    <q-card class="unpaid-bills-card q-mt-md" elevation-3>
+      <q-card-section class="card-header">
+        <q-icon name="monetization_on" color="primary" size="32px" class="q-mr-md" />
+        <div class="text-h4 section-title">Bollette Non Pagate</div>
       </q-card-section>
 
-      <q-separator />
+      <q-card-section v-if="unpaidBills.length" class="bills-content">
+        <div class="bills-grid">
+          <div
+            v-for="bill in unpaidBills"
+            :key="bill._id"
+            class="bill-card"
+            :class="{ 'bill-card-urgent': isDueSoon(bill.due_date) }"
+          >
+            <div class="bill-header">
+              <div class="bill-provider">{{ bill.provider }}</div>
+              <div class="bill-number">{{ bill.bill_number }}</div>
+            </div>
 
-      <q-card-section v-if="unpaidBills.length">
-        <q-list>
-          <q-item v-for="bill in unpaidBills" :key="bill._id" class="column q-mb-md text-center">
-            <q-item-section>
-              <q-item-label class="text-h5">
-                {{ bill.provider }} - {{ bill.bill_number }}
-              </q-item-label>
-              <q-item-label class="text-h5">
-                <span class="text-h6 text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
-              </q-item-label>
-              <q-item-label caption>
-                <q-badge class="text-body1" :color="isDueSoon(bill.due_date) ? 'red' : 'orange'">
-                  Scadenza: {{ formatDate(bill.due_date) }}
-                </q-badge>
-              </q-item-label>
-            </q-item-section>
+            <div class="bill-details">
+              <div class="bill-amount">
+                <span class="label">Importo:</span>
+                <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
+              </div>
+              <div class="bill-due">
+                <span class="label">Scadenza:</span>
+                <span class="value" :class="{ 'text-negative': isDueSoon(bill.due_date) }">
+                  {{ formatDate(bill.due_date) }}
+                </span>
+              </div>
+            </div>
 
-            <q-item-section class="q-mt-md">
-              <q-btn-dropdown color="primary" label="Aggiorna Stato" dense>
+            <div class="bill-actions">
+              <q-btn-dropdown
+                color="primary"
+                label="Aggiorna Stato"
+                outline
+                dense
+                class="full-width"
+              >
                 <q-list>
                   <q-item clickable v-close-popup @click="updateStatus(bill._id, 'paid')">
                     <q-item-section>Segna come Pagata</q-item-section>
@@ -68,53 +82,55 @@
                   </q-item>
                 </q-list>
               </q-btn-dropdown>
-            </q-item-section>
-          </q-item>
-        </q-list>
+            </div>
+          </div>
+        </div>
       </q-card-section>
 
-      <q-card-section v-else class="text-center text-grey">
+      <q-card-section v-else class="text-h4 text-center text-primary">
         Nessuna bolletta in sospeso
       </q-card-section>
     </q-card>
 
     <!-- Overdue Bills Card -->
-    <q-card class="q-pa-md q-mx-auto q-mt-md" style="max-width: 800px">
-      <q-card-section>
-        <div class="text-h4 text-center text-negative">Bollette Scadute</div>
+    <q-card class="overdue-bills-card q-mt-md" elevation-3>
+      <q-card-section class="card-header">
+        <q-icon name="warning" color="negative" size="32px" class="q-mr-md" />
+        <div class="text-h4 text-negative section-title">Bollette Scadute</div>
       </q-card-section>
 
-      <q-separator />
+      <q-card-section v-if="overdueBills.length" class="bills-content">
+        <div class="bills-grid">
+          <div v-for="bill in overdueBills" :key="bill._id" class="bill-card bill-card-overdue">
+            <div class="bill-header">
+              <div class="bill-provider">{{ bill.provider }}</div>
+              <div class="bill-number">{{ bill.bill_number }}</div>
+            </div>
 
-      <q-card-section v-if="overdueBills.length">
-        <q-list>
-          <q-item v-for="bill in overdueBills" :key="bill._id" class="column q-mb-md text-center">
-            <q-item-section>
-              <q-item-label class="text-bold text-h5">
-                {{ bill.provider }} - {{ bill.bill_number }}
-              </q-item-label>
-              <q-item-label class="text-h5">
-                <span class="text-h6 text-primary">Importo:</span> €{{ bill.expenses.total_amount }}
-              </q-item-label>
-              <q-item-label class="text-body1">
-                <span class="text-body1 text-negative">Scaduta il:</span>
-                {{ formatDate(bill.due_date) }}
-              </q-item-label>
-            </q-item-section>
+            <div class="bill-details">
+              <div class="bill-amount">
+                <span class="label">Importo:</span>
+                <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
+              </div>
+              <div class="bill-due">
+                <span class="label text-negative">Scaduta il:</span>
+                <span class="value text-negative">{{ formatDate(bill.due_date) }}</span>
+              </div>
+            </div>
 
-            <q-item-section class="q-mt-md">
+            <div class="bill-actions">
               <q-btn
                 color="positive"
                 label="Segna come Pagata"
                 @click="updateStatus(bill._id, 'paid')"
                 class="full-width"
               />
-            </q-item-section>
-          </q-item>
-        </q-list>
+            </div>
+          </div>
+        </div>
       </q-card-section>
 
-      <q-card-section v-else class="text-center text-grey">
+      <q-card-section v-else class="text-h4 text-center text-primary">
         Nessuna bolletta scaduta
       </q-card-section>
     </q-card>
@@ -211,10 +227,10 @@ export default {
               gradient.addColorStop(1, '#1e3a8a')
               return gradient
             },
-            borderColor: '#1e3a8a',
+            borderColor: '#1A3275',
             borderWidth: 1,
-            hoverBackgroundColor: '#2563eb',
-            hoverBorderColor: '#1e3a8a',
+            hoverBackgroundColor: '#1040A8',
+            hoverBorderColor: '#1A3275',
             borderRadius: 8,
             barThickness: 40, // Controls the width of bars
             data: [],
@@ -231,7 +247,7 @@ export default {
         },
       },
       pieChartData: {
-        labels: ['Energia', 'Gas'],
+        labels: [],
         datasets: [
           {
             backgroundColor: ['#033b4f', '#b4c6cb'],
@@ -311,10 +327,10 @@ export default {
               gradient.addColorStop(1, '#b4c6cb')
               return gradient
             },
-            borderColor: '#1e3a8a',
+            borderColor: '#1A3275',
             borderWidth: 1,
-            hoverBackgroundColor: '#2563eb',
-            hoverBorderColor: '#1e3a8a',
+            hoverBackgroundColor: '#1040A8',
+            hoverBorderColor: '#1A3275',
             borderRadius: 8,
             barThickness: 40,
             data: data.length > 0 ? data : [0],
@@ -384,29 +400,199 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.q-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.dashboard-container {
+  background-color: $light;
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  color: $primary;
+  font-weight: bold;
+  letter-spacing: -1px;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background-color: $light1;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.unpaid-bills-card {
+  @extend .dashboard-card;
+
+  background-color: $grey;
+}
+
+.overdue-bills-card {
+  @extend .dashboard-card;
+
+  background-color: $grey;
+}
+
+.section-title {
+  color: $primary;
+  font-weight: 600;
+  border-bottom: 3px solid $primary;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .chart-container {
   width: 100%;
-  height: 300px;
-  min-height: 300px;
-  max-height: 400px;
+  height: 350px;
+  position: relative;
 }
 
-.q-item {
-  margin: 1rem 0 1rem 0;
-  background-color: $grey;
-  border-radius: 4px;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
-
-.q-list {
-  padding: 0.5rem 0 0.5rem 0;
+.bills-list {
   background-color: transparent;
+  padding: 0;
+}
+
+.bill-item {
+  background-color: $light2;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: lighten($light2, 3%);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  &.overdue {
+    background-color: rgba($negative, 0.05);
+    border-left: 4px solid $negative;
+  }
+}
+
+.bill-provider {
+  color: $primary;
+  margin-bottom: 0.5rem;
+}
+
+.bill-due-badge {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+// Chart modifications
+:deep(.chartjs-render-monitor) {
+  transition: all 0.3s ease;
+}
+
+.bills-content {
+  padding: 0;
+}
+
+.bills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.bill-card {
+  background-color: $light;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid $light2;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &-urgent {
+    border-left: 4px solid $warning;
+    animation: pulse 1.5s infinite;
+  }
+
+  &-overdue {
+    border-left: 4px solid $negative;
+    background-color: rgba($negative, 0.05);
+  }
+}
+
+.bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid $light2;
+  padding-bottom: 0.5rem;
+
+  .bill-provider {
+    font-weight: bold;
+    color: $primary;
+    font-size: 1.1rem;
+  }
+
+  .bill-number {
+    color: $dark;
+    font-size: 0.9rem;
+  }
+}
+
+.bill-details {
+  margin-bottom: 1rem;
+
+  .label {
+    color: $primary;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    opacity: 0.7;
+  }
+
+  .value {
+    font-weight: bold;
+    color: $dark;
+  }
+
+  .bill-amount,
+  .bill-due {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.bill-actions {
+  margin-top: auto;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba($warning, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba($warning, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($warning, 0);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: $light1;
+
+  .section-title {
+    margin: 0;
+    flex-grow: 1;
+  }
 }
 </style>

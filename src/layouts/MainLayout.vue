@@ -31,28 +31,28 @@
           <q-item-section avatar>
             <q-icon name="home" />
           </q-item-section>
-          <q-item-section>Home</q-item-section>
+          <q-item-section>HOME</q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/admin">
+        <q-item clickable v-ripple to="/admin" v-if="authStore.loggedUser.role === 'admin'">
           <q-item-section avatar>
             <q-icon name="admin_panel_settings" />
           </q-item-section>
-          <q-item-section>Admin</q-item-section>
+          <q-item-section>ADMIN</q-item-section>
         </q-item>
 
         <q-item clickable v-ripple to="/bills">
           <q-item-section avatar>
             <q-icon name="receipt_long" />
           </q-item-section>
-          <q-item-section>Bollette</q-item-section>
+          <q-item-section>BOLLETTE</q-item-section>
         </q-item>
 
         <q-item clickable v-ripple to="/contracts">
           <q-item-section avatar>
             <q-icon name="description" />
           </q-item-section>
-          <q-item-section>Forniture</q-item-section>
+          <q-item-section>FORNITURE</q-item-section>
         </q-item>
 
         <!-- Pushes Logout Button to the Bottom -->
@@ -145,9 +145,9 @@ export default {
 
 <style scoped lang="scss">
 .q-list {
-  background-color: $light;
+  background-color: $light1;
   border-radius: 0;
-  color: #3a3238;
+  color: $dark;
 }
 
 .logout {

@@ -8,14 +8,14 @@ export default defineConfig((/* ctx */) => {
     theme: {
       dark: false,
       colors: {
-        primary: '#1E88E5',
-        secondary: '#26A69A',
-        accent: '#9C27B0',
-        dark: '#1D1D1D',
-        positive: '#21BA45',
-        negative: '#C10015',
-        warning: '#F2C037',
-        info: '#31CCEC',
+        primary: '#033b4f',
+        secondary: '#b4c6cb',
+        accent: '#2A7F62',
+        dark: '#1d1d1d',
+        positive: '#436436',
+        negative: '#721817',
+        warning: '#e28413',
+        info: '#2589bd',
       },
     },
 
@@ -94,7 +94,7 @@ export default defineConfig((/* ctx */) => {
     framework: {
       config: {
         notify: {
-          position: 'top-right',
+          position: 'bottom',
           timeout: 3000,
           color: 'primary',
           textColor: 'white',

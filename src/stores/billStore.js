@@ -82,7 +82,9 @@ export const useBillStore = defineStore('billStore', {
         const response = await axios.get(`${globalBaseUrl}/api/bills`, {
           headers: { Authorization: `Bearer ${token}` },
         })
+        console.log('response fetch bills', response)
         this.bills = response.data
+        console.log('bills', this.bills)
       } catch (error) {
         console.error('Error fetching bills:', error)
         Notify.create({
@@ -135,8 +137,8 @@ export const useBillStore = defineStore('billStore', {
         })
 
         if (response.status === 201) {
-          this.bills.push(response.data)
           this.resetForm()
+          this.fetchBills()
 
           Notify.create({
             message: 'Bolletta aggiunta correttamente',
@@ -213,7 +215,7 @@ export const useBillStore = defineStore('billStore', {
           message: error.message || 'Errore nel recupero del riepilogo bollette',
           color: 'negative',
           icon: 'error',
-          position: 'top-right',
+          position: 'bottom',
         })
       } finally {
         this.loading = false
@@ -233,7 +235,7 @@ export const useBillStore = defineStore('billStore', {
           message: error.message || 'Errore nel recupero delle bollette non pagate',
           color: 'negative',
           icon: 'error',
-          position: 'top-right',
+          position: 'bottom',
         })
       } finally {
         this.loading = false
@@ -253,7 +255,7 @@ export const useBillStore = defineStore('billStore', {
           message: error.message || 'Errore nel recupero delle bollette scadute',
           color: 'negative',
           icon: 'error',
-          position: 'top-right',
+          position: 'bottom',
         })
       } finally {
         this.loading = false
@@ -280,11 +282,37 @@ export const useBillStore = defineStore('billStore', {
           position: 'bottom',
         })
 
-        await this.fetchBills()
+        await this.fetchOverdueBills()
+        await this.fetchUnpaidBills()
       } catch (error) {
         console.error('Error updating bill status:', error)
         Notify.create({
           message: error.response?.data?.message || 'Errore aggiornando lo stato della bolletta',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
+      }
+    },
+
+    async deleteBill(billId) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.delete(`${globalBaseUrl}/api/bills/${billId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        Notify.create({
+          message: 'Bolletta eliminata correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
+
+        await this.fetchBills()
+      } catch (error) {
+        console.error('Error deleting bill:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore eliminando la bolletta',
           color: 'negative',
           icon: 'error',
           position: 'bottom',
