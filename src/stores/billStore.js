@@ -402,7 +402,7 @@ export const useBillStore = defineStore('billStore', {
 
         if (response.data.structuredData) {
           // console.log('structured data', response.data.structuredData)
-          this.populateBillForm(response.data.structuredData)
+          this.populateBillForm(response.data.structuredData, response.data.file_url)
           this.openDialog()
 
           Notify.create({
@@ -422,7 +422,7 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
-    populateBillForm(data) {
+    populateBillForm(data, fileUrl) {
       const formatDateForInput = (dateStr) => {
         if (!dateStr) return ''
 
@@ -461,6 +461,7 @@ export const useBillStore = defineStore('billStore', {
 
       this.newBill = {
         ...data,
+        file_url: fileUrl,
         billing_period_start: formatDateForInput(data.billing_period_start),
         billing_period_end: formatDateForInput(data.billing_period_end),
         due_date: formatDateForInput(data.due_date),
@@ -474,7 +475,7 @@ export const useBillStore = defineStore('billStore', {
         const token = localStorage.getItem('token')
         const response = await axios.get(`${globalBaseUrl}/api/bills/download/${bill._id}`, {
           headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob', // Important to handle file response
+          responseType: 'blob',
         })
 
         const filename = bill.file_url ? bill.file_url.split('/').pop() : `bolletta_${bill._id}.pdf`
@@ -498,6 +499,7 @@ export const useBillStore = defineStore('billStore', {
         Notify.create({
           message: error.message || 'Errore durante il download del PDF',
           color: 'negative',
+          icon: 'error',
           position: 'bottom',
         })
       }

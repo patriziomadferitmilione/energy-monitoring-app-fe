@@ -2,28 +2,63 @@
   <q-layout view="lHh lpR fFf">
     <q-page-container>
       <q-page class="flex flex-center">
+        <!-- <q-btn label="Send Test Email" color="primary" @click="sendTestEmail" /> -->
         <q-card class="q-pa-md shadow-2" style="width: 300px">
           <q-card-section>
-            <div class="text-h6">Login</div>
+            <div class="text-h6">{{ isSignup ? 'Iscrizione' : 'Login' }}</div>
           </q-card-section>
 
-          <!-- Form to avoid DOM warning -->
-          <q-form @submit.prevent="login">
+          <q-form @submit.prevent="isSignup ? register() : login()">
             <q-card-section>
-              <q-input v-model="email" label="Email" type="email" autocomplete="email" />
+              <q-input v-model="email" label="Email" type="email" required autocomplete="email" />
+
               <q-input
                 v-model="password"
                 label="Password"
                 type="password"
                 class="q-mt-md"
+                required
                 autocomplete="current-password"
+              />
+
+              <q-input
+                v-if="isSignup"
+                v-model="first_name"
+                label="First Name"
+                type="text"
+                class="q-mt-md"
+                required
+              />
+              <q-input
+                v-if="isSignup"
+                v-model="last_name"
+                label="Last Name"
+                type="text"
+                class="q-mt-md"
+                required
+              />
+              <q-input
+                v-if="isSignup"
+                v-model="phone"
+                label="Phone (Optional)"
+                type="text"
+                class="q-mt-md"
               />
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn type="submit" label="Login" color="primary" />
+              <q-btn type="submit" :label="isSignup ? 'Iscriviti' : 'Login'" color="primary" />
             </q-card-actions>
           </q-form>
+
+          <q-card-section class="text-center">
+            <q-btn
+              flat
+              @click="toggleMode"
+              :label="isSignup ? 'Login' : 'Iscrizione'"
+              color="primary"
+            />
+          </q-card-section>
         </q-card>
       </q-page>
     </q-page-container>
@@ -32,13 +67,18 @@
 
 <script>
 import { useAuthStore } from 'stores/authStore'
+import { Notify } from 'quasar'
 
 export default {
   data() {
     return {
       authStore: useAuthStore(),
+      isSignup: false,
       email: '',
       password: '',
+      first_name: '',
+      last_name: '',
+      phone: '',
     }
   },
   methods: {
@@ -48,7 +88,49 @@ export default {
         this.$router.push('/')
       } catch (error) {
         console.error('[LoginPage] Login error:', error)
-        alert(error.response?.data?.message || 'Invalid credentials or server error.')
+        Notify.create({
+          message: error.response?.data?.message || 'Invalid credentials or server error.',
+          color: 'negative',
+          position: 'bottom',
+        })
+      }
+    },
+    async register() {
+      try {
+        await this.authStore.register({
+          role: 'user',
+          email: this.email,
+          password: this.password,
+          first_name: this.first_name,
+          last_name: this.last_name,
+          phone: this.phone,
+        })
+      } catch (error) {
+        console.error('[LoginPage] Registration error:', error)
+      }
+    },
+    toggleMode() {
+      this.isSignup = !this.isSignup
+    },
+
+    // test email MAILER SEND
+    async sendTestEmail() {
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/test-email')
+        const data = await response.json()
+        console.log('✅ Test email response:', data)
+        Notify.create({
+          message: 'Test email sent! Check your inbox.',
+          color: 'positive',
+          position: 'bottom',
+        })
+      } catch (error) {
+        console.error('❌ Error sending test email:', error)
+        Notify.create({
+          message: error.message || 'Failed to send test email.',
+          color: 'negative',
+          position: 'bottom',
+        })
       }
     },
   },

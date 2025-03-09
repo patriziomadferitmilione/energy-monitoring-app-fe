@@ -104,7 +104,7 @@
           <div
             v-for="bill in filteredBills"
             :key="bill._id"
-            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            class="col-12 col-sm-6 col-md-4 col-lg-3 card-div"
           >
             <q-card class="bill-card">
               <q-card-section :class="['bill-header', getStatusClass(bill.status)]">
@@ -133,19 +133,19 @@
 
                 <div class="row q-col-gutter-sm q-mb-md">
                   <div class="col-6">
-                    <div class="text-caption text-grey">Consumo</div>
+                    <div class="text-caption text-primary">Consumo</div>
                     <div class="text-body2">
                       {{ bill.consumption?.total_value || '0' }}
                       {{ bill.consumption?.unit || 'kWh' }}
                     </div>
                   </div>
                   <div class="col-6">
-                    <div class="text-caption text-grey">Scadenza</div>
+                    <div class="text-caption text-primary">Scadenza</div>
                     <div class="text-body2">{{ formatDate(bill.due_date) }}</div>
                   </div>
                 </div>
 
-                <div class="text-caption text-grey q-mb-xs">Stato</div>
+                <div class="text-caption text-primary q-mb-xs">Stato</div>
                 <q-select
                   v-model="bill.status"
                   :options="[
@@ -201,7 +201,7 @@
           <div
             v-for="bill in filteredBills"
             :key="bill._id"
-            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            class="col-12 col-sm-6 col-md-4 col-lg-3 card-div"
           >
             <q-card class="bill-card">
               <q-card-section :class="['bill-header', getStatusClass(bill.status)]">
@@ -230,19 +230,19 @@
 
                 <div class="row q-col-gutter-sm q-mb-md">
                   <div class="col-6">
-                    <div class="text-caption text-grey">Consumo</div>
+                    <div class="text-caption text-primary">Consumo</div>
                     <div class="text-body2">
                       {{ bill.consumption?.total_value || '0' }}
                       {{ bill.consumption?.unit || 'm³' }}
                     </div>
                   </div>
                   <div class="col-6">
-                    <div class="text-caption text-grey">Scadenza</div>
+                    <div class="text-caption text-primary">Scadenza</div>
                     <div class="text-body2">{{ formatDate(bill.due_date) }}</div>
                   </div>
                 </div>
 
-                <div class="text-caption text-grey q-mb-xs">Stato</div>
+                <div class="text-caption text-primary q-mb-xs">Stato</div>
                 <q-select
                   v-model="bill.status"
                   :options="[
@@ -820,6 +820,7 @@ export default {
     // Bills
     saveBill() {
       this.billStore.addBill()
+      this.modeDialog = false
     },
     async updateStatus(billId, newStatus) {
       await this.billStore.updateBillStatus(billId, newStatus)
@@ -964,6 +965,10 @@ export default {
 
 .col {
   text-align: center;
+}
+
+.card-div {
+  margin-bottom: 3rem;
 }
 
 .bill-card {
