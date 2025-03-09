@@ -40,6 +40,30 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async register(userData) {
+      console.log('userData', userData)
+      try {
+        const response = await axios.post(`${globalBaseUrl}/api/auth/register`, userData)
+
+        Notify.create({
+          message: "Iscrizione avvenuta con successo! Ora puoi eseguire l'accesso",
+          color: 'positive',
+          position: 'bottom',
+        })
+
+        return response.data
+      } catch (error) {
+        console.error('[authStore] Registration failed:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore durante la registrazione',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
+        throw error
+      }
+    },
+
     logout() {
       localStorage.removeItem('token')
       localStorage.removeItem('authenticated')
