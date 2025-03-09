@@ -59,6 +59,11 @@ export const useBillStore = defineStore('billStore', {
     providerDialog: false,
     selectedProvider: null,
     selectedBillType: null,
+    billMeans: {
+      this_month: { energy: 0, gas: 0 },
+      last_month: { energy: 0, gas: 0 },
+      year: { energy: 0, gas: 0 },
+    },
   }),
 
   getters: {
@@ -295,28 +300,25 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
-    async deleteBill(billId) {
+    async fetchBillMeans() {
+      this.loading = true
       try {
-        const token = localStorage.getItem('token')
-        await axios.delete(`${globalBaseUrl}/api/bills/${billId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await axios.get(`${globalBaseUrl}/api/bills/means`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-
-        Notify.create({
-          message: 'Bolletta eliminata correttamente',
-          color: 'positive',
-          position: 'bottom',
-        })
-
-        await this.fetchBills()
+        console.log('means res', response)
+        this.billMeans = response.data
+        console.log('bill means', this.billMeans)
       } catch (error) {
-        console.error('Error deleting bill:', error)
+        console.error('Error fetching bill means:', error)
         Notify.create({
-          message: error.response?.data?.message || 'Errore eliminando la bolletta',
+          message: error.message || 'Errore nel recupero delle medie delle bollette',
           color: 'negative',
           icon: 'error',
           position: 'bottom',
         })
+      } finally {
+        this.loading = false
       }
     },
 
@@ -436,6 +438,31 @@ export const useBillStore = defineStore('billStore', {
         due_date: formatDateForInput(data.due_date),
         issue_date: formatDateForInput(data.issue_date),
         status: data.status || 'pending',
+      }
+    },
+
+    async deleteBill(billId) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.delete(`${globalBaseUrl}/api/bills/${billId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        Notify.create({
+          message: 'Bolletta eliminata correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
+
+        await this.fetchBills()
+      } catch (error) {
+        console.error('Error deleting bill:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore eliminando la bolletta',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       }
     },
   },

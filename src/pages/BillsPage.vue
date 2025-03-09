@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md page">
     <h4 class="text-center">Bollette</h4>
 
     <div class="row q-col-gutter-md items-center justify-between">
@@ -9,43 +9,17 @@
           color="primary"
           label="Nuova Bolletta"
           icon="add"
-          @click="billStore.openDialog()"
-          class="full-width"
-        />
-      </div>
-
-      <!-- Upload File Input -->
-      <div class="col-12 col-sm-auto">
-        <q-file
-          v-model="billStore.pdfFile"
-          label="Carica Bolletta (PDF)"
-          accept=".pdf"
-          class="full-width"
-          filled
-          dense
-          clearable
-        >
-          <template v-slot:prepend>
-            <q-icon name="upload" />
-          </template>
-        </q-file>
-      </div>
-
-      <!-- Extract Data Button -->
-      <div class="col-12 col-sm-auto">
-        <q-btn
-          label="Estrai Dati"
-          color="primary"
-          icon="find_in_page"
-          @click="billStore.openProviderDialog()"
+          @click="modeDialog = true"
           class="full-width"
         />
       </div>
     </div>
 
+    <q-separator class="q-my-md" />
+
     <!-- Filters Dropdown -->
-    <q-expansion-item expand-separator icon="filter_list" label="Filtri" class="q-mt-md">
-      <q-card class="q-pa-md">
+    <q-expansion-item expand-separator icon="filter_list" label="Filtri" class="q-mt-md filtri-exp">
+      <q-card class="q-pa-md filtri-card">
         <q-card-section>
           <div class="row q-col-gutter-md">
             <!-- First Column -->
@@ -122,10 +96,10 @@
       <q-tab name="gas" label="Gas" />
     </q-tabs>
 
-    <q-tab-panels v-model="activeTab" animated>
+    <q-tab-panels class="panels" v-model="activeTab" animated>
       <!-- ENERGY -->
       <q-tab-panel name="energy" class="q-pa-none q-mt-md panel">
-        <h5>Bollette Luce</h5>
+        <h5 class="text-center">Bollette Luce</h5>
         <div v-if="filteredBills.length" class="row q-col-gutter-md">
           <div
             v-for="bill in filteredBills"
@@ -207,7 +181,7 @@
       </q-tab-panel>
       <!-- GAS -->
       <q-tab-panel name="gas" class="q-pa-none q-mt-md panel">
-        <h5>Bollette Gas</h5>
+        <h5 class="text-center">Bollette Gas</h5>
         <div v-if="filteredBills.length" class="row q-col-gutter-md">
           <div
             v-for="bill in filteredBills"
@@ -289,9 +263,52 @@
       </q-tab-panel>
     </q-tab-panels>
 
+    <!-- New Bill Mode Dialog -->
+    <q-dialog v-model="modeDialog">
+      <q-card style="width: 20vw">
+        <q-card-section class="row items-center">
+          <q-btn
+            label="Inserimento manuale"
+            color="primary"
+            icon="edit"
+            @click="billStore.openDialog()"
+            class="full-width"
+          />
+        </q-card-section>
+
+        <q-separator class="q-my-md" />
+
+        <q-card-section class="row items-center">
+          <!-- Upload File Input -->
+          <q-file
+            v-model="billStore.pdfFile"
+            label="Carica Bolletta (PDF)"
+            label-color="primary"
+            accept=".pdf"
+            class="full-width"
+            bg-color="secondary"
+            outlined
+            dense
+          >
+            <template v-slot:prepend>
+              <q-icon name="upload" />
+            </template>
+          </q-file>
+          <!-- Extract Data Button -->
+          <q-btn
+            label="Estrai Dati"
+            color="primary"
+            icon="find_in_page"
+            @click="billStore.openProviderDialog()"
+            class="full-width"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
     <!-- Bill Details Dialog -->
     <q-dialog v-model="detailsDialog">
-      <q-card style="min-width: 350px; max-width: 600px">
+      <q-card style="min-width: 15vw; max-width: 60vw">
         <q-card-section
           class="row items-center"
           :class="selectedBill ? getStatusClass(selectedBill.status) : ''"
@@ -714,6 +731,7 @@ export default {
         dateEnd: '',
         showPaid: false,
       },
+      modeDialog: false,
       detailsDialog: false,
       deleteDialog: false,
       selectedBill: null,
@@ -869,6 +887,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page {
+  background-color: $light;
+}
+
 .q-tab {
   width: 50%;
 }
@@ -880,7 +902,7 @@ export default {
 .bill-card {
   transition: all 0.3s ease;
   height: 100%;
-  background-color: $grey;
+  background-color: $light;
   margin: 0.5rem;
 
   &:hover {
@@ -893,7 +915,18 @@ export default {
   }
 }
 
+.panels {
+  background-color: $light1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
 .panel {
   overflow-y: hidden;
+}
+
+.filtri-card,
+.filtri-exp {
+  background-color: $light;
 }
 </style>

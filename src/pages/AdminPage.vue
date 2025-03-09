@@ -1,19 +1,21 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md page">
     <div class="row justify-between items-center">
-      <h4 class="text-primary">Gestione Utenti e Provider</h4>
+      <h4 class="text-primary">Pannello Admin</h4>
       <div>
         <q-btn
           color="primary"
           label="Nuovo Utente"
           icon="person_add"
+          text-color="secondary"
           @click="adminStore.openUserDialog()"
           class="q-mr-md"
         />
         <q-btn
           color="secondary"
-          label="Nuovo Provider"
+          label="Nuovo Fornitore"
           icon="business"
+          text-color="primary"
           @click="adminStore.openProviderDialog()"
         />
       </div>
@@ -21,77 +23,97 @@
 
     <q-separator class="q-my-md" />
 
-    <!-- USERS LIST -->
-    <q-card flat bordered class="q-mb-md">
-      <q-card-section class="bg-primary text-white">
-        <div class="text-h6">Utenti</div>
-      </q-card-section>
+    <div class="row q-col-gutter-md items-baseline justify-center">
+      <!-- USERS LIST -->
+      <div class="col-12 col-md-6">
+        <q-card flat bordered class="q-mb-md card">
+          <q-card-section class="bg-primary text-secondary">
+            <div class="text-h6">Utenti</div>
+          </q-card-section>
 
-      <q-card-section>
-        <div v-if="users.length" class="row q-col-gutter-md">
-          <div v-for="user in users" :key="user._id" class="col-12 col-sm-6 col-md-4">
-            <q-card class="user-card">
-              <q-card-section>
-                <div class="text-h6">{{ user.first_name }} {{ user.last_name }}</div>
-                <div class="text-caption">{{ user.role.toUpperCase() }}</div>
-              </q-card-section>
+          <q-card-section class="user-list">
+            <div v-if="users.length" class="row q-col-gutter-md">
+              <div v-for="user in users" :key="user._id" class="col-12 col-sm-6 col-md-6">
+                <q-card class="user-card">
+                  <q-card-section>
+                    <div class="text-h6">{{ user.first_name }} {{ user.last_name }}</div>
+                    <div class="text-caption">{{ user.role.toUpperCase() }}</div>
+                  </q-card-section>
 
-              <q-card-section>
-                <div class="text-body2"><q-icon name="email" /> {{ user.email }}</div>
-                <div class="text-body2"><q-icon name="phone" /> {{ user.phone || 'N/A' }}</div>
-              </q-card-section>
+                  <q-card-section>
+                    <div class="text-body2"><q-icon name="email" /> {{ user.email }}</div>
+                    <div class="text-body2"><q-icon name="phone" /> {{ user.phone || 'N/A' }}</div>
+                  </q-card-section>
 
-              <q-separator />
+                  <q-separator />
 
-              <q-card-actions align="right">
-                <q-btn flat icon="edit" color="info" @click="adminStore.openEditUserDialog(user)" />
-                <q-btn flat icon="delete" color="negative" @click="confirmDeleteUser(user._id)" />
-              </q-card-actions>
-            </q-card>
-          </div>
-        </div>
+                  <q-card-actions align="right">
+                    <q-btn
+                      flat
+                      icon="edit"
+                      color="info"
+                      @click="adminStore.openEditUserDialog(user)"
+                    />
+                    <q-btn
+                      flat
+                      icon="delete"
+                      color="negative"
+                      @click="confirmDeleteUser(user._id)"
+                    />
+                  </q-card-actions>
+                </q-card>
+              </div>
+            </div>
 
-        <q-banner v-else class="bg-warning text-dark"> Nessun utente disponibile. </q-banner>
-      </q-card-section>
-    </q-card>
+            <q-banner v-else class="bg-warning text-dark"> Nessun utente disponibile. </q-banner>
+          </q-card-section>
+        </q-card>
+      </div>
 
-    <!-- PROVIDERS LIST -->
-    <q-card flat bordered>
-      <q-card-section class="bg-secondary text-white">
-        <div class="text-h6">Providers</div>
-      </q-card-section>
+      <!-- PROVIDERS LIST -->
+      <div class="col-12 col-md-6">
+        <q-card flat bordered class="card">
+          <q-card-section class="bg-secondary text-primary">
+            <div class="text-h6">Fornitori</div>
+          </q-card-section>
 
-      <q-card-section>
-        <div v-if="providers.length" class="row q-col-gutter-md">
-          <div v-for="provider in providers" :key="provider._id" class="col-12 col-sm-6 col-md-4">
-            <q-card class="provider-card">
-              <q-card-section>
-                <div class="text-h6">{{ provider.name }}</div>
-              </q-card-section>
+          <q-card-section class="provider-list">
+            <div v-if="providers.length" class="row q-col-gutter-md">
+              <div
+                v-for="provider in providers"
+                :key="provider._id"
+                class="col-12 col-sm-6 col-md-6"
+              >
+                <q-card class="provider-card">
+                  <q-card-section>
+                    <div class="text-h6">{{ provider.name }}</div>
+                  </q-card-section>
 
-              <q-separator />
+                  <q-separator />
 
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  icon="edit"
-                  color="info"
-                  @click="adminStore.openEditProviderDialog(provider)"
-                />
-                <q-btn
-                  flat
-                  icon="delete"
-                  color="negative"
-                  @click="confirmDeleteProvider(provider._id)"
-                />
-              </q-card-actions>
-            </q-card>
-          </div>
-        </div>
+                  <q-card-actions align="right">
+                    <q-btn
+                      flat
+                      icon="edit"
+                      color="info"
+                      @click="adminStore.openEditProviderDialog(provider)"
+                    />
+                    <q-btn
+                      flat
+                      icon="delete"
+                      color="negative"
+                      @click="confirmDeleteProvider(provider._id)"
+                    />
+                  </q-card-actions>
+                </q-card>
+              </div>
+            </div>
 
-        <q-banner v-else class="bg-warning text-dark"> Nessun provider disponibile. </q-banner>
-      </q-card-section>
-    </q-card>
+            <q-banner v-else class="bg-warning text-dark"> Nessun provider disponibile. </q-banner>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
     <!-- ADD / EDIT USER DIALOG -->
     <q-dialog v-model="adminStore.showUserDialog">
@@ -246,3 +268,30 @@ export default {
   },
 }
 </script>
+
+<style scoped lang="scss">
+.page {
+  background-color: $light;
+}
+
+.card {
+  min-height: 50vh;
+  background-color: $light1;
+}
+
+.user-list {
+  background-color: $light1;
+
+  .user-card {
+    background-color: $light;
+  }
+}
+
+.provider-list {
+  background-color: $light1;
+
+  .provider-card {
+    background-color: $light;
+  }
+}
+</style>

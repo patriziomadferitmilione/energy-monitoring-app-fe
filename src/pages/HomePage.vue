@@ -19,6 +19,72 @@
       </q-card-section>
     </q-card>
 
+    <q-separator class="q-my-md" />
+
+    <!-- Means Cards -->
+    <div class="row q-col-gutter-md">
+      <!-- Energy -->
+      <div class="col-12 col-md-6">
+        <q-card class="dashboard-card energy-means-card" elevation-3>
+          <q-card-section class="full-width">
+            <div class="text-h5 text-center q-mb-md section-title">Media Spese Energia</div>
+          </q-card-section>
+          <q-card-section class="full-width text-center">
+            <div v-if="billStore.billMeans.last_month.energy">
+              <span class="text-h5">Ultimo mese:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.last_month.energy.toFixed(2) }}</span
+              >
+            </div>
+            <q-separator class="q-my-md" v-if="billStore.billMeans.last_month.energy" />
+            <div v-if="billStore.billMeans.this_month.energy">
+              <span class="text-h5">Questo mese:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.this_month.energy.toFixed(2) }}</span
+              >
+            </div>
+            <q-separator class="q-my-md" v-if="billStore.billMeans.this_month.energy" />
+            <div v-if="billStore.billMeans.year.energy">
+              <span class="text-h5">Anno corrente:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.year.energy.toFixed(2) }}</span
+              >
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+      <!-- Gas -->
+      <div class="col-12 col-md-6">
+        <q-card class="dashboard-card gas-means-card" elevation-3>
+          <q-card-section class="full-width">
+            <div class="text-h5 text-center q-mb-md section-title">Media Spese Gas</div>
+          </q-card-section>
+          <q-card-section class="full-width text-center">
+            <div v-if="billStore.billMeans.last_month.gas">
+              <span class="text-h5">Ultimo mese:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.last_month.gas.toFixed(2) }}</span
+              >
+            </div>
+            <q-separator class="q-my-md" v-if="billStore.billMeans.last_month.gas" />
+            <div v-if="billStore.billMeans.this_month.gas">
+              <span class="text-h5">Questo mese:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.this_month.gas.toFixed(2) }}</span
+              >
+            </div>
+            <q-separator class="q-my-md" v-if="billStore.billMeans.this_month.gas" />
+            <div v-if="billStore.billMeans.year.gas">
+              <span class="text-h5">Anno corrente:</span>
+              <span class="text-h4 text-primary"
+                >€{{ billStore.billMeans.year.gas.toFixed(2) }}</span
+              >
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
     <!-- Pie Chart for Gas vs Energy -->
     <q-card class="dashboard-card distribution-chart-card q-mt-md" elevation-3>
       <q-card-section class="full-width">
@@ -32,108 +98,116 @@
       </q-card-section>
     </q-card>
 
-    <!-- Unpaid Bills List -->
-    <q-card class="unpaid-bills-card q-mt-md" elevation-3>
-      <q-card-section class="card-header">
-        <q-icon name="monetization_on" color="primary" size="32px" class="q-mr-md" />
-        <div class="text-h4 section-title">Bollette Non Pagate</div>
-      </q-card-section>
+    <q-separator class="q-my-md" />
 
-      <q-card-section v-if="unpaidBills.length" class="bills-content">
-        <div class="bills-grid">
-          <div
-            v-for="bill in unpaidBills"
-            :key="bill._id"
-            class="bill-card"
-            :class="{ 'bill-card-urgent': isDueSoon(bill.due_date) }"
-          >
-            <div class="bill-header">
-              <div class="bill-provider">{{ bill.provider }}</div>
-              <div class="bill-number">{{ bill.bill_number }}</div>
-            </div>
+    <div class="row q-col-gutter-md items-center justify-between">
+      <!-- Unpaid Bills List -->
+      <div class="col-12 col-md-6">
+        <q-card class="unpaid-bills-card q-mt-md" elevation-3>
+          <q-card-section class="card-header">
+            <q-icon name="monetization_on" color="primary" size="32px" class="q-mr-md" />
+            <div class="text-h5 section-title text-center">Bollette Non Pagate</div>
+          </q-card-section>
 
-            <div class="bill-details">
-              <div class="bill-amount">
-                <span class="label">Importo:</span>
-                <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
-              </div>
-              <div class="bill-due">
-                <span class="label">Scadenza:</span>
-                <span class="value" :class="{ 'text-negative': isDueSoon(bill.due_date) }">
-                  {{ formatDate(bill.due_date) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="bill-actions">
-              <q-btn-dropdown
-                color="primary"
-                label="Aggiorna Stato"
-                outline
-                dense
-                class="full-width"
+          <q-card-section v-if="unpaidBills.length" class="bills-content">
+            <div class="bills-grid">
+              <div
+                v-for="bill in unpaidBills"
+                :key="bill._id"
+                class="bill-card"
+                :class="{ 'bill-card-urgent': isDueSoon(bill.due_date) }"
               >
-                <q-list>
-                  <q-item clickable v-close-popup @click="updateStatus(bill._id, 'paid')">
-                    <q-item-section>Segna come Pagata</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup @click="updateStatus(bill._id, 'overdue')">
-                    <q-item-section>Segna come Scaduta</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
-            </div>
-          </div>
-        </div>
-      </q-card-section>
+                <div class="bill-header">
+                  <div class="bill-provider">{{ bill.provider }}</div>
+                  <div class="bill-number">{{ bill.bill_number }}</div>
+                </div>
 
-      <q-card-section v-else class="text-h4 text-center text-primary">
-        Nessuna bolletta in sospeso
-      </q-card-section>
-    </q-card>
+                <div class="bill-details">
+                  <div class="bill-amount">
+                    <span class="label">Importo:</span>
+                    <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
+                  </div>
+                  <div class="bill-due">
+                    <span class="label">Scadenza:</span>
+                    <span class="value" :class="{ 'text-negative': isDueSoon(bill.due_date) }">
+                      {{ formatDate(bill.due_date) }}
+                    </span>
+                  </div>
+                </div>
 
-    <!-- Overdue Bills Card -->
-    <q-card class="overdue-bills-card q-mt-md" elevation-3>
-      <q-card-section class="card-header">
-        <q-icon name="warning" color="negative" size="32px" class="q-mr-md" />
-        <div class="text-h4 text-negative section-title">Bollette Scadute</div>
-      </q-card-section>
-
-      <q-card-section v-if="overdueBills.length" class="bills-content">
-        <div class="bills-grid">
-          <div v-for="bill in overdueBills" :key="bill._id" class="bill-card bill-card-overdue">
-            <div class="bill-header">
-              <div class="bill-provider">{{ bill.provider }}</div>
-              <div class="bill-number">{{ bill.bill_number }}</div>
-            </div>
-
-            <div class="bill-details">
-              <div class="bill-amount">
-                <span class="label">Importo:</span>
-                <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
-              </div>
-              <div class="bill-due">
-                <span class="label text-negative">Scaduta il:</span>
-                <span class="value text-negative">{{ formatDate(bill.due_date) }}</span>
+                <div class="bill-actions">
+                  <q-btn-dropdown
+                    color="primary"
+                    label="Aggiorna Stato"
+                    outline
+                    dense
+                    class="full-width"
+                  >
+                    <q-list>
+                      <q-item clickable v-close-popup @click="updateStatus(bill._id, 'paid')">
+                        <q-item-section>Segna come Pagata</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click="updateStatus(bill._id, 'overdue')">
+                        <q-item-section>Segna come Scaduta</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-btn-dropdown>
+                </div>
               </div>
             </div>
+          </q-card-section>
 
-            <div class="bill-actions">
-              <q-btn
-                color="positive"
-                label="Segna come Pagata"
-                @click="updateStatus(bill._id, 'paid')"
-                class="full-width"
-              />
+          <q-card-section v-else class="text-h4 text-center text-primary no-results">
+            Nessuna bolletta in sospeso
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Overdue Bills Card -->
+      <div class="col-12 col-md-6">
+        <q-card class="overdue-bills-card q-mt-md" elevation-3>
+          <q-card-section class="card-header">
+            <q-icon name="warning" color="negative" size="32px" class="q-mr-md" />
+            <div class="text-h5 text-negative text-center section-title">Bollette Scadute</div>
+          </q-card-section>
+
+          <q-card-section v-if="overdueBills.length" class="bills-content">
+            <div class="bills-grid">
+              <div v-for="bill in overdueBills" :key="bill._id" class="bill-card bill-card-overdue">
+                <div class="bill-header">
+                  <div class="bill-provider">{{ bill.provider }}</div>
+                  <div class="bill-number">{{ bill.bill_number }}</div>
+                </div>
+
+                <div class="bill-details">
+                  <div class="bill-amount">
+                    <span class="label">Importo:</span>
+                    <span class="value">€{{ bill.expenses.total_amount.toFixed(2) }}</span>
+                  </div>
+                  <div class="bill-due">
+                    <span class="label text-negative">Scaduta il:</span>
+                    <span class="value text-negative">{{ formatDate(bill.due_date) }}</span>
+                  </div>
+                </div>
+
+                <div class="bill-actions">
+                  <q-btn
+                    color="positive"
+                    label="Segna come Pagata"
+                    @click="updateStatus(bill._id, 'paid')"
+                    class="full-width"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </q-card-section>
+          </q-card-section>
 
-      <q-card-section v-else class="text-h4 text-center text-primary">
-        Nessuna bolletta scaduta
-      </q-card-section>
-    </q-card>
+          <q-card-section v-else class="text-h4 text-center text-primary no-results">
+            Nessuna bolletta scaduta
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -274,6 +348,8 @@ export default {
 
     await this.billStore.fetchOverdueBills()
     this.overdueBills = this.billStore.overdueBills
+
+    await this.billStore.fetchBillMeans()
 
     this.initialLoading = false
   },
@@ -594,5 +670,9 @@ export default {
     margin: 0;
     flex-grow: 1;
   }
+}
+
+.no-results {
+  background-color: $light;
 }
 </style>

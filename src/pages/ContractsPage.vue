@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md page">
     <div class="row justify-between items-center">
       <h4 class="text-primary">Contratti</h4>
       <q-btn
@@ -230,3 +230,13 @@ export default {
   },
 }
 </script>
+
+<style scoped lang="scss">
+.page {
+  background-color: $light;
+}
+
+.contract-card {
+  background-color: $light1;
+}
+</style>

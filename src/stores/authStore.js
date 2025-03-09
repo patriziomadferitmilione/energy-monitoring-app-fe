@@ -73,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
 
         if (response.status === 200) {
           this.isAuthenticated = true
-          this.loggedUser = response.data
+          this.loggedUser = response.data.user
           localStorage.setItem('loggedUser', JSON.stringify(response.data))
         } else {
           this.logout()
