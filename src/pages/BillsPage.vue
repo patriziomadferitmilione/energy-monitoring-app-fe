@@ -163,12 +163,27 @@
               </q-card-section>
 
               <q-card-actions align="right">
+                <q-btn flat color="info" icon="visibility" @click="showDetails(bill)" />
                 <q-btn
+                  v-if="bill.hasPDF"
                   flat
                   color="info"
-                  label="Dettagli"
-                  icon="visibility"
-                  @click="showDetails(bill)"
+                  icon="download"
+                  @click="downloadBillPDF(bill)"
+                />
+                <q-btn
+                  v-else
+                  flat
+                  color="info"
+                  icon="upload"
+                  @click="triggerFileUpload(bill._id)"
+                />
+                <q-file
+                  :ref="`fileInput-${bill._id}`"
+                  v-show="false"
+                  v-model="bill.selectedFile"
+                  accept=".pdf"
+                  @update:model-value="uploadBillPDF(bill)"
                 />
                 <q-btn flat color="negative" icon="delete" @click="confirmDelete(bill._id)" />
               </q-card-actions>
@@ -245,12 +260,27 @@
               </q-card-section>
 
               <q-card-actions align="right">
+                <q-btn flat color="info" icon="visibility" @click="showDetails(bill)" />
                 <q-btn
+                  v-if="bill.hasPDF"
                   flat
                   color="info"
-                  label="Dettagli"
-                  icon="visibility"
-                  @click="showDetails(bill)"
+                  icon="download"
+                  @click="downloadBillPDF(bill)"
+                />
+                <q-btn
+                  v-else
+                  flat
+                  color="info"
+                  icon="upload"
+                  @click="triggerFileUpload(bill._id)"
+                />
+                <q-file
+                  :ref="`fileInput-${bill._id}`"
+                  v-show="false"
+                  v-model="bill.selectedFile"
+                  accept=".pdf"
+                  @update:model-value="uploadBillPDF(bill)"
                 />
                 <q-btn flat color="negative" icon="delete" @click="confirmDelete(bill._id)" />
               </q-card-actions>
@@ -714,6 +744,7 @@ import { useBillStore } from 'src/stores/billStore'
 import { useAdminStore } from 'src/stores/adminStore'
 import { useContractStore } from '../stores/contractStore'
 import { mapActions } from 'pinia'
+import { Notify } from 'quasar'
 
 export default {
   name: 'BillsPage',
@@ -805,6 +836,42 @@ export default {
       if (this.billToDelete) {
         await this.billStore.deleteBill(this.billToDelete)
         this.billToDelete = null
+      }
+    },
+    async downloadBillPDF(bill) {
+      try {
+        await this.billStore.downloadBillPDF(bill)
+      } catch (error) {
+        console.error('Error downloading bill PDF:', error)
+      }
+    },
+    async triggerFileUpload(billId) {
+      await this.$nextTick()
+
+      const fileInput = this.$refs[`fileInput-${billId}`]
+
+      if (fileInput && fileInput.length > 0) {
+        fileInput[0].pickFiles()
+      } else {
+        console.error(`File input for bill ${billId} not found`)
+      }
+    },
+    async uploadBillPDF(bill) {
+      if (!bill.selectedFile) {
+        Notify.create({
+          message: 'Seleziona un file PDF da caricare',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
+        return
+      }
+
+      try {
+        await this.billStore.uploadBillPDF(bill._id, bill.selectedFile)
+        bill.hasPDF = true
+      } catch (error) {
+        console.error('Error uploading bill PDF:', error)
       }
     },
 

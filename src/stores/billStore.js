@@ -88,8 +88,11 @@ export const useBillStore = defineStore('billStore', {
           headers: { Authorization: `Bearer ${token}` },
         })
         console.log('response fetch bills', response)
-        this.bills = response.data
-        console.log('bills', this.bills)
+
+        this.bills = response.data.map((bill) => ({
+          ...bill,
+          hasPDF: !!bill.file_url,
+        }))
       } catch (error) {
         console.error('Error fetching bills:', error)
         Notify.create({
@@ -177,6 +180,31 @@ export const useBillStore = defineStore('billStore', {
             position: 'bottom',
           })
         }
+      }
+    },
+
+    async deleteBill(billId) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.delete(`${globalBaseUrl}/api/bills/${billId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        Notify.create({
+          message: 'Bolletta eliminata correttamente',
+          color: 'positive',
+          position: 'bottom',
+        })
+
+        await this.fetchBills()
+      } catch (error) {
+        console.error('Error deleting bill:', error)
+        Notify.create({
+          message: error.response?.data?.message || 'Errore eliminando la bolletta',
+          color: 'negative',
+          icon: 'error',
+          position: 'bottom',
+        })
       }
     },
 
@@ -322,7 +350,7 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
-    // UPLOAD
+    // UPLOAD - DOWNLOAD
     openProviderDialog() {
       this.providerDialog = true
     },
@@ -441,24 +469,67 @@ export const useBillStore = defineStore('billStore', {
       }
     },
 
-    async deleteBill(billId) {
+    async downloadBillPDF(bill) {
       try {
         const token = localStorage.getItem('token')
-        await axios.delete(`${globalBaseUrl}/api/bills/${billId}`, {
+        const response = await axios.get(`${globalBaseUrl}/api/bills/download/${bill._id}`, {
           headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob', // Important to handle file response
         })
 
+        const filename = bill.file_url ? bill.file_url.split('/').pop() : `bolletta_${bill._id}.pdf`
+
+        const blob = new Blob([response.data], { type: 'application/pdf' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+
         Notify.create({
-          message: 'Bolletta eliminata correttamente',
+          message: 'Download avviato con successo!',
+          color: 'positive',
+          position: 'bottom',
+        })
+      } catch (error) {
+        console.error('Error downloading bill PDF:', error)
+        Notify.create({
+          message: error.message || 'Errore durante il download del PDF',
+          color: 'negative',
+          position: 'bottom',
+        })
+      }
+    },
+
+    async uploadBillPDF(billId, file) {
+      try {
+        console.log('📤 Uploading PDF for bill ID:', billId, 'File:', file)
+
+        let formData = new FormData()
+        formData.append('pdfFile', file)
+
+        const token = localStorage.getItem('token')
+        const response = await axios.post(`${globalBaseUrl}/api/bills/upload/${billId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        console.log('✅ Upload success:', response.data)
+        Notify.create({
+          message: 'PDF uploaded successfully',
           color: 'positive',
           position: 'bottom',
         })
 
-        await this.fetchBills()
+        return response.data
       } catch (error) {
-        console.error('Error deleting bill:', error)
+        console.error('🚨 Error uploading PDF:', error)
         Notify.create({
-          message: error.response?.data?.message || 'Errore eliminando la bolletta',
+          message: error.response?.data?.message || 'Error uploading PDF',
           color: 'negative',
           icon: 'error',
           position: 'bottom',
