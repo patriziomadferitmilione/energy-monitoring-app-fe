@@ -133,23 +133,6 @@ export default {
         })
       }
     },
-    async register() {
-      try {
-        await this.authStore.register({
-          role: 'user',
-          email: this.email,
-          password: this.password,
-          first_name: this.first_name,
-          last_name: this.last_name,
-          phone: this.phone,
-        })
-      } catch (error) {
-        console.error('[LoginPage] Registration error:', error)
-      }
-    },
-    toggleMode() {
-      this.isSignup = !this.isSignup
-    },
   },
 }
 </script>
