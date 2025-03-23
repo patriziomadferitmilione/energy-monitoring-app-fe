@@ -295,7 +295,7 @@
 
     <!-- New Bill Mode Dialog -->
     <q-dialog v-model="modeDialog">
-      <q-card style="width: 20vw">
+      <q-card style="width: 400px">
         <q-card-section class="row items-center">
           <q-btn
             label="Inserimento manuale"
@@ -589,12 +589,12 @@
             <!-- Third Column - Consumption -->
             <div class="col-12 col-md-4">
               <div class="text-subtitle1 q-mb-sm">Consumo</div>
-              <q-select
+              <!-- <q-select
                 v-model="billStore.newBill.consumption.unit"
                 label="Unità di Consumo"
                 :options="['kWh', 'm3']"
                 class="q-mb-md"
-              />
+              /> -->
               <q-input
                 v-model.number="billStore.newBill.consumption.total_value"
                 label="Consumo Totale"

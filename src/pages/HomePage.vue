@@ -360,7 +360,7 @@ export default {
         const response = await fetch('/api/unpaid-bills')
         this.unpaidBills = await response.json()
       } catch (error) {
-        console.error('🚨 Error fetching unpaid bills:', error)
+        console.error('Error fetching unpaid bills:', error)
       } finally {
         this.loadingUnpaid = false
       }

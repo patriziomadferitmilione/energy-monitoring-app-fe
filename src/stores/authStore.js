@@ -17,7 +17,6 @@ export const useAuthStore = defineStore('auth', {
 
         localStorage.setItem('token', user.token)
         localStorage.setItem('loggedUser', JSON.stringify(user))
-        localStorage.setItem('authenticated', 'true')
 
         this.isAuthenticated = true
         this.loggedUser = user
@@ -66,16 +65,9 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       localStorage.removeItem('token')
-      localStorage.removeItem('authenticated')
       localStorage.removeItem('loggedUser')
       this.isAuthenticated = false
       this.loggedUser = null
-
-      Notify.create({
-        message: 'Logout eseguito correttamente',
-        color: 'positive',
-        position: 'bottom',
-      })
     },
 
     async checkAuth() {
@@ -83,7 +75,6 @@ export const useAuthStore = defineStore('auth', {
 
       if (!token) {
         localStorage.removeItem('token')
-        localStorage.removeItem('authenticated')
         localStorage.removeItem('loggedUser')
         this.isAuthenticated = false
         this.loggedUser = null
@@ -104,12 +95,6 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.error('[authStore] Auth check failed:', error)
-        Notify.create({
-          message: error.response?.data?.message || 'Autenticazione non valida',
-          color: 'negative',
-          icon: 'error',
-          position: 'bottom',
-        })
         this.logout()
       }
     },

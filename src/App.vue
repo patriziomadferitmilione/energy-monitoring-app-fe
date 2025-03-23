@@ -22,7 +22,6 @@ export default {
     this.authStore.checkAuth()
 
     if (this.isAuthenticated) {
-      console.log('[App.vue] User authenticated, fetching bills...')
       await this.billStore.fetchBills()
     }
   },

@@ -74,6 +74,7 @@ export const useBillStore = defineStore('billStore', {
 
   actions: {
     openDialog() {
+      this.newBill.bill_type = this.selectedBillType
       this.showDialog = true
     },
     closeDialog() {
@@ -404,6 +405,7 @@ export const useBillStore = defineStore('billStore', {
           // console.log('structured data', response.data.structuredData)
           this.populateBillForm(response.data.structuredData, response.data.file_url)
           this.openDialog()
+          this.pdfFile = null
 
           Notify.create({
             message: 'Dati bolletta estratti correttamente',
@@ -412,7 +414,7 @@ export const useBillStore = defineStore('billStore', {
           })
         }
       } catch (error) {
-        console.error('🚨 Upload Error:', error)
+        console.error('Upload Error:', error)
         Notify.create({
           message: error.response?.data?.message || 'Errore nel caricamento del file',
           color: 'negative',
@@ -529,7 +531,7 @@ export const useBillStore = defineStore('billStore', {
 
         return response.data
       } catch (error) {
-        console.error('🚨 Error uploading PDF:', error)
+        console.error('Error uploading PDF:', error)
         Notify.create({
           message: error.response?.data?.message || 'Error uploading PDF',
           color: 'negative',
